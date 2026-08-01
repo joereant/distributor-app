@@ -116,12 +116,10 @@
 - Biaya setup (sekali)
 - Langganan bulanan (berisi fitur Fase 1)
 - Upgrade level 1 & 2 (tambahan)
-- (isi harga sesuai kesepakatan)
 
 ### 17. Penutup / CTA
 - "Siap tingkatkan operasional distributor Anda?"
 - Undang diskusi, demo, atau tanya harga
-- Kontak JR Logix
 - Terima kasih
 
 ---
