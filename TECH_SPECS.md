@@ -1,7 +1,7 @@
 # DistributorApp — Technical Specs
 
 ## Overview
-Aplikasi manajemen distributor semen. Digunakan oleh customer client (distributor) untuk bertransaksi dan monitoring transaksi.
+Aplikasi manajemen distributor semen. Digunakan oleh distributor (client) untuk menerima order dari customer, menghitung estimasi ongkir, memproses transaksi, dan monitoring penjualan.
 
 ## Stack
 | Layer | Teknologi |
@@ -10,14 +10,14 @@ Aplikasi manajemen distributor semen. Digunakan oleh customer client (distributo
 | Frontend | Svelte 5 + Inertia.js |
 | Styling | Tailwind CSS |
 | Database | PostgreSQL |
-| Auth | Azure SSO + Laravel Sanctum |
-| Deployment | Docker (Laravel Sail) |
+| Auth | Google (Gmail) OAuth + manual login |
+| Deployment | Belum diputuskan (Docker tidak terpasang di PC dev) |
 
 ## Arsitektur
 Single-stack, multi-panel (pola Corsales):
 - Backend API + frontend Svelte dalam 1 repo Laravel
 - Inertia.js untuk server-side rendering dengan Svelte components
-- Multi-panel: Admin panel, Sales panel, Customer panel, VIP panel
+- Multi-panel: Owner panel, Admin panel, Sales panel, Customer panel
 
 ## Struktur Folder
 ```
@@ -48,6 +48,8 @@ DistributorApp/
 │   │   │   └── Pages/
 │   │   │       ├── Admin/
 │   │   │       ├── Auth/
+│   │   │       ├── Customer/
+│   │   │       ├── Owner/
 │   │   │       └── Sales/
 │   │   └── views/
 │   ├── routes/
@@ -65,61 +67,86 @@ DistributorApp/
 ├── .gitignore
 ├── CLAUDE.md
 ├── TECH_SPECS.md
-└── README.md
+├── PLAN.md
+├── README.md
+├── PRESENTATION_KERANGKA.md
+└── Proposal_DistributorApp.pptx
+```
+
+## Alur Bisnis
+```
+Customer order (pilih produk + input tujuan kirim)
+  → sistem hitung estimasi ongkir (produk + ongkir = total)
+  → submit → status PENDING
+  → Admin approve + lihat estimasi cuan/rugi
+  → APPROVED → diproses & dikirim → status DONE
+  → semua panel memantau status real-time
 ```
 
 ## Modules (rencana)
-1. **Auth & User Management** — registrasi, login, role (admin, sales, customer, vip), Azure SSO
-2. **Master Data** — produk, harga, customer, area distribusi, gudang, kategori
-3. **Transaksi Penjualan** — order, invoice, pembayaran, retur, delivery order
-4. **Inventory** — stok real-time per gudang, alert stok rendah, mutasi antar gudang
-5. **Dashboard & Monitoring** — ringkasan transaksi, penjualan per area, top produk, piutang outstanding
-6. **Audit Log** — jejak perubahan data
-7. **Fitur Tambahan** — credit limit, scheme/discount, sales target, delivery tracking, import Excel
+1. **Auth & User Management** — login Google (Gmail) + manual, registrasi, verifikasi admin, role (owner, admin, sales, customer)
+2. **Master Data** — produk, harga per area, harga beli, customer, area, ongkir, kategori
+3. **Transaksi Penjualan** — order online customer, approve admin, hitung total (produk + ongkir), estimasi cuan/rugi
+4. **Sistem Referal** — lacak customer yang beli via non-sales
+5. **Dashboard & Monitoring** — ringkasan penjualan, transaksi terbaru, status per panel
+6. **Laporan** — rekap penjualan dasar (export)
+7. **Fitur Upgrade (L1/L2)** — analisa transaksi, piutang & kredit, target komisi, integrasi produsen, tracking pengiriman, multi-gudang
 
 ## Panel & Role
 | Panel | Role | Akses |
 |-------|------|-------|
-| Admin | admin | Full CRUD semua modul, manajemen user, laporan lengkap |
-| Sales | sales | Buat transaksi, lihat customer area sendiri, monitor transaksi |
-| Customer | customer | Lihat transaksi sendiri, place order, monitor pengiriman |
-| VIP | vip | Semua akses customer + priority support, analytics ringan |
+| Owner | owner | Akses penuh Admin + Sales, monitoring seluruh penjualan distributor |
+| Admin | admin | Kelola data, user, harga, ongkir, approve order, laporan |
+| Sales | sales | Monitoring area sendiri + customer referal (read-only, tanpa buat order) |
+| Customer | customer | Order online, input tujuan kirim, pantau status & pengiriman |
 
 ## Model Data Utama
 | Model | Tabel | Kolom Utama |
 |-------|-------|-------------|
-| User | `users` | id, name, email, password, azure_id, role, status, verified_at, sales_area_id |
+| User | `users` | id, name, email, password, google_id, role, status, verified_at, sales_area_id |
 | Customer | `customers` | id, user_id (opsional), company_name, contact_person, phone, email, address, area_id, customer_type |
-| Product | `products` | id, name, code, description, unit, price, category_id, min_stock |
-| Transaction | `transactions` | id, customer_id, user_id (sales), transaction_date, total, status, payment_method, notes |
+| Product | `products` | id, name, code, description, unit, price, harga_beli, category_id, min_stock |
+| ProductPrice | `product_prices` | id, product_id, area_id, price (harga per area dari produsen) |
+| Plant | `plants` | id, name, location, area_id |
+| ShippingRate | `shipping_rates` | id, plant_id, area_id, rate (tarif ongkir Franco) |
+| Transaction | `transactions` | id, customer_id, sales_id, plant_id, transaction_date, subtotal, ongkir, harga_beli, total, margin_estimate, margin_status, status, payment_method, notes |
 | TransactionItem | `transaction_items` | id, transaction_id, product_id, quantity, unit_price, subtotal |
 | Distribution | `distributions` | id, transaction_id, product_id, quantity, destination, status, shipped_at |
-| Inventory | `inventories` | id, product_id, warehouse_id, quantity, min_stock |
+| Referal | `referals` | id, customer_id, transaction_id, referral_code |
 | Area | `areas` | id, name, code, region |
 | Warehouse | `warehouses` | id, name, location, area_id |
 | Category | `categories` | id, name, slug |
 
-## Fitur MVP (P0)
-- Auth: login, registrasi dengan role, verifikasi admin
-- Dashboard: ringkasan transaksi, navigasi panel
-- Manajemen Produk (Admin): CRUD produk
-- Transaksi Penjualan (Sales): buat order, pilih customer & produk
-- Monitor Transaksi (Customer): lihat transaksi sendiri
+## Fitur Awal (Fase 1) — P0
+- Auth: login Google (Gmail) + manual, kedua cara bisa buat user, verifikasi admin
+- 4 panel & role dengan dashboard masing-masing
+- Dashboard: ringkasan penjualan, transaksi terbaru, navigasi panel
+- Katalog produk + harga per area
+- Manajemen Produk & Harga (Admin): CRUD produk, set harga per area, harga beli
+- Area & Ongkir (Admin): CRUD area + tarif ongkir Franco
+- Order Online (Customer): pilih produk, input tujuan, hitung ongkir otomatis, total = produk + ongkir
+- Approve Order (Admin): review pending order + estimasi cuan/rugi (fitur standar)
+- Sistem Referal: lacak customer beli via non-sales
+- Monitoring Status: transaksi terlihat di semua panel
+- Laporan penjualan dasar
 
-## Fitur Tambahan (P1)
-- Credit limit per customer
-- Scheme/discount per wilayah
-- Sales target tracking
-- Delivery tracking real-time
-- Audit trail
-- Multi-gudang support
-- Import data Excel
+## Fitur Upgrade
+### Level 1 — Business
+- Analisa transaksi (tren penjualan, produk terlaris, pola musiman)
+- Piutang & kredit (limit kredit, aging, status pembayaran)
+- Target & komisi sales
+- Laporan lengkap (export Excel/PDF) + audit trail
+
+### Level 2 — Enterprise
+- Integrasi produsen (sinkronisasi harga & PO)
+- Tracking pengiriman real-time
+- Multi-gudang & manajemen stok
 
 ## Auth Approach
-- Azure SSO (ikuti pola Corsales)
-- Manual registration dengan form `register_as` (ADMIN / SALES / CUSTOMER / VIP)
-- Verifikasi SUPERADMIN wajib sebelum aktif
+- Login Google (Gmail) OAuth + manual login/registration
+- Kedua cara bisa membuat user (tidak semua customer punya Gmail)
+- Verifikasi admin wajib sebelum akun aktif
 - Role-based access via middleware `CheckRole`
 
 ## Status
-Draft — diskusi fitur belum final, menunggu konfirmasi om.
+Final — desain fitur & panel sudah disepakati. Scaffold Laravel belum berjalan (public/, bootstrap.js, app.blade.php, svelte.config.js belum ada; composer/npm belum diinstall).
