@@ -24,6 +24,30 @@
     const groupedProducts = $derived(page.props.grouped_products ?? {});
     const priceMap = $derived(page.props.prices ?? {});
 
+    // ── Tab: Kategori ──────────────────────────────
+    let catSearch = $state('');
+
+    function openCategoryCreate() {
+        const name = prompt('Nama Kategori baru:');
+        if (name?.trim()) {
+            router.post('/admin/products/categories', { name: name.trim() });
+        }
+    }
+
+    function toggleCategory(id) {
+        router.post(`/admin/products/categories/${id}/toggle`);
+    }
+
+    function deleteCategory(id) {
+        if (confirm('Hapus kategori ini?')) {
+            router.delete(`/admin/products/categories/${id}`);
+        }
+    }
+
+    function applyCatFilter() {
+        router.get('/admin/products', { tab: 'categories', search: catSearch || undefined });
+    }
+
     // Price form state: { [product_id]: { [area_id]: value } }
     let priceForm = $state({});
 
@@ -140,6 +164,10 @@
             <button onclick={() => setTab('prices')} class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition {tab === 'prices' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2z"/><path d="M7 7h.01"/></svg>
                 Daftar Harga
+            </button>
+            <button onclick={() => setTab('categories')} class="flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition {tab === 'categories' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                Kategori
             </button>
         </div>
 
@@ -293,6 +321,67 @@
                 </div>
                 <p class="mt-2 text-xs text-slate-400">Klik sel untuk edit harga per produk per area. Tekan Enter untuk simpan per cell, atau klik "Simpan Harga" di atas.</p>
             {/if}
+
+        <!-- ── TAB: Kategori ──────────────────────── -->
+        {:else if tab === 'categories'}
+            <!-- Filter & Add -->
+            <div class="mb-4 flex flex-wrap items-center gap-3">
+                <div class="relative min-w-[200px] flex-1">
+                    <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    </span>
+                    <input bind:value={catSearch} type="search" placeholder="Cari kategori..." onkeydown={(e) => e.key === 'Enter' && applyCatFilter()} class="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-800 shadow-sm transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100" />
+                </div>
+                <button onclick={applyCatFilter} class="rounded-xl bg-slate-100 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-200">Cari</button>
+                <button onclick={openCategoryCreate} class="ml-auto inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="h-4 w-4"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+                    Tambah Kategori
+                </button>
+            </div>
+
+            <!-- List -->
+            <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
+                {#if allCategories.length === 0}
+                    <p class="px-5 py-12 text-center text-sm text-slate-400">Belum ada kategori.</p>
+                {:else}
+                    <ul class="divide-y divide-slate-100">
+                        {#each allCategories as c (c.id)}
+                            <li class="flex items-center gap-4 px-5 py-3.5 {!c.is_active ? 'opacity-50' : ''}">
+                                <!-- Icon -->
+                                <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                                </div>
+                                <!-- Info -->
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-semibold text-slate-800 truncate">{c.name}</p>
+                                    <p class="text-xs text-slate-400">
+                                        {c.products_count ?? 0} produk
+                                        {#if !c.is_active} · <span class="text-amber-600 font-medium">Nonaktif</span>{/if}
+                                    </p>
+                                </div>
+                                <!-- Actions -->
+                                <div class="flex items-center gap-2 flex-shrink-0">
+                                    <button onclick={() => toggleCategory(c.id)} class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium transition {c.is_active ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100' : 'bg-amber-50 text-amber-700 hover:bg-amber-100'}">
+                                        {#if c.is_active}
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                            Aktif
+                                        {:else}
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                                            Nonaktif
+                                        {/if}
+                                    </button>
+                                    {#if (c.products_count ?? 0) === 0}
+                                        <button onclick={() => deleteCategory(c.id)} class="inline-flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-medium bg-red-50 text-red-600 transition hover:bg-red-100">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                                            Hapus
+                                        </button>
+                                    {/if}
+                                </div>
+                            </li>
+                        {/each}
+                    </ul>
+                {/if}
+            </div>
         {/if}
     </div>
 

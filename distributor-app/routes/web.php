@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
@@ -35,17 +34,14 @@ Route::middleware('auth')->group(function () {
         // Products
         Route::get('/admin/products', [ProductController::class, 'index']);
         Route::post('/admin/products/prices', [ProductController::class, 'savePrices']);
+        Route::post('/admin/products/categories', [ProductController::class, 'saveCategory']);
+        Route::post('/admin/products/categories/{category}/toggle', [ProductController::class, 'toggleCategory']);
+        Route::delete('/admin/products/categories/{category}', [ProductController::class, 'deleteCategory']);
         Route::get('/admin/products/create', [ProductController::class, 'create']);
         Route::post('/admin/products', [ProductController::class, 'store']);
         Route::get('/admin/products/{product}/edit', [ProductController::class, 'edit']);
         Route::put('/admin/products/{product}', [ProductController::class, 'update']);
         Route::delete('/admin/products/{product}', [ProductController::class, 'destroy']);
-
-        // Categories
-        Route::get('/admin/categories', [CategoryController::class, 'index']);
-        Route::post('/admin/categories', [CategoryController::class, 'store']);
-        Route::put('/admin/categories/{category}', [CategoryController::class, 'update']);
-        Route::delete('/admin/categories/{category}', [CategoryController::class, 'destroy']);
     });
     Route::middleware('role:sales')->get('/sales', [DashboardController::class, 'sales']);
 

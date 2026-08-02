@@ -26,14 +26,12 @@
             { label: 'Dashboard', href: '/owner', icon: 'home' },
             { label: 'Order', href: '/admin/orders', icon: 'cart' },
             { label: 'Produk', href: '/admin/products', icon: 'box' },
-            { label: 'Kategori', href: '/admin/categories', icon: 'tag' },
             { label: 'User', href: '/admin/users', icon: 'users' },
         ],
         admin: [
             { label: 'Dashboard', href: '/admin', icon: 'home' },
             { label: 'Order', href: '/admin/orders', icon: 'cart' },
             { label: 'Produk', href: '/admin/products', icon: 'box' },
-            { label: 'Kategori', href: '/admin/categories', icon: 'tag' },
             { label: 'User', href: '/admin/users', icon: 'users' },
         ],
         sales: [

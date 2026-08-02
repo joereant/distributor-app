@@ -21,6 +21,10 @@ class ProductController extends Controller
             return $this->pricesTab($request);
         }
 
+        if ($tab === 'categories') {
+            return $this->categoriesTab($request);
+        }
+
         return $this->productsTab($request);
     }
 
@@ -42,6 +46,21 @@ class ProductController extends Controller
             'categories' => $categories,
             'filters' => $request->only(['search', 'category', 'active']),
             'tab' => 'products',
+        ]);
+    }
+
+    private function categoriesTab(Request $request)
+    {
+        $categories = Category::withCount('products')
+            ->when($request->search, fn ($q) => $q->where('name', 'like', "%{$request->search}%"))
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
+
+        return inertia('Admin/Product/Index', [
+            'tab' => 'categories',
+            'categories' => $categories,
+            'filters' => $request->only(['search']),
         ]);
     }
 
@@ -174,7 +193,7 @@ class ProductController extends Controller
         ]);
 
         $plantId = $data['plant_id'];
-        $prices = $data['prices']; // [product_id][area_id] => price
+        $prices = $data['prices'];
 
         foreach ($prices as $productId => $areaPrices) {
             foreach ($areaPrices as $areaId => $price) {
@@ -188,5 +207,39 @@ class ProductController extends Controller
         }
 
         return back()->with('message', 'Daftar harga berhasil disimpan.');
+    }
+
+    public function saveCategory(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
+        ]);
+
+        $data['slug'] = Str::slug($data['name']);
+        $data['is_active'] = true;
+
+        $category = Category::create($data);
+
+        return back()->with('message', "Kategori '{$category->name}' berhasil ditambahkan.");
+    }
+
+    public function toggleCategory(Category $category)
+    {
+        $category->update(['is_active' => !$category->is_active]);
+
+        return back()->with('message', $category->is_active
+            ? "Kategori '{$category->name}' diaktifkan."
+            : "Kategori '{$category->name}' dinonaktifkan.");
+    }
+
+    public function deleteCategory(Category $category)
+    {
+        if ($category->products()->exists()) {
+            return back()->withErrors(['delete' => "Kategori '{$category->name}' tidak bisa dihapus karena masih punya {$category->products()->count()} produk."]);
+        }
+
+        $category->delete();
+
+        return back()->with('message', "Kategori '{$category->name}' berhasil dihapus.");
     }
 }
