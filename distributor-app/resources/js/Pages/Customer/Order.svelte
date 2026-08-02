@@ -17,13 +17,29 @@
 
     const rateByArea = $derived(Object.fromEntries(shippingRates.map((r) => [String(r.area_id), Number(r.rate)])));
 
-    const filtered = $derived(
-        products.filter((p) => {
-            const q = query.trim().toLowerCase();
-            if (!q) return true;
-            return p.name.toLowerCase().includes(q) || (p.code ?? '').toLowerCase().includes(q);
-        })
+    const packagingLabel = {
+        zak: 'Zak',
+        ton_bag: 'Ton Bag',
+        bulk: 'Curah',
+    };
+
+    const packagingStyle = {
+        zak: 'bg-primary-50 text-primary-700 ring-primary-100',
+        ton_bag: 'bg-amber-50 text-amber-700 ring-amber-100',
+        bulk: 'bg-slate-100 text-slate-600 ring-slate-200',
+    };
+
+    // For filtered display, flatten grouped
+    const filteredGrouped = $derived(
+        query.trim()
+            ? { 'Hasil Pencarian': products.filter((p) => {
+                const q = query.trim().toLowerCase();
+                return p.name.toLowerCase().includes(q) || (p.code ?? '').toLowerCase().includes(q);
+              })}
+            : groupedProducts
     );
+
+    const hasResults = $derived(Object.values(filteredGrouped).some(g => g.length > 0));
 
     const selected = $derived(
         products
@@ -89,32 +105,42 @@
                     </label>
                 </div>
 
-                {#if filtered.length === 0}
+                {#if !hasResults}
                     <p class="rounded-xl bg-white py-12 text-center text-sm text-slate-400 ring-1 ring-slate-200">Produk tidak ditemukan.</p>
                 {:else}
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        {#each filtered as p (p.id)}
-                            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
-                                <div class="flex items-start justify-between gap-2">
-                                    <div class="min-w-0">
-                                        <p class="truncate font-semibold text-slate-800">{p.name}</p>
-                                        <p class="mt-0.5 text-xs text-slate-400">{p.code}</p>
-                                    </div>
-                                    <span class="shrink-0 rounded-full bg-primary-50 px-2 py-0.5 text-[11px] font-semibold text-primary-700 ring-1 ring-primary-100">
-                                        {areaId ? formatRp(unitPrice(p)) : formatRp(p.price)}
-                                    </span>
-                                </div>
-                                <div class="mt-4 flex items-center justify-between">
-                                    <p class="text-xs text-slate-500">Harga /{p.unit} <span class="font-medium text-slate-700">{areaId ? 'untuk area dipilih' : 'harga dasar'}</span></p>
-                                    <div class="flex items-center gap-2">
-                                        <button onclick={() => changeQty(p.id, -1)} class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-200 disabled:opacity-40" disabled={!quantities[p.id]}>−</button>
-                                        <span class="w-7 text-center text-sm font-bold text-slate-800">{quantities[p.id] ?? 0}</span>
-                                        <button onclick={() => changeQty(p.id, 1)} class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white transition hover:bg-primary-700">+</button>
-                                    </div>
+                    {#each Object.entries(filteredGrouped) as [category, prods] (category)}
+                        {#if prods.length > 0}
+                            <div class="space-y-3">
+                                <h3 class="text-xs font-semibold uppercase tracking-wide text-slate-400">{category}</h3>
+                                <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                    {#each prods as p (p.id)}
+                                        <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+                                            <div class="flex items-start justify-between gap-2">
+                                                <div class="min-w-0">
+                                                    <p class="truncate font-semibold text-slate-800">{p.name}</p>
+                                                    <p class="mt-0.5 text-xs text-slate-400">{p.code ?? ''}</p>
+                                                </div>
+                                                <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold ring-1 {packagingStyle[p.packaging_type] ?? packagingStyle.zak}">
+                                                    {packagingLabel[p.packaging_type] ?? p.packaging_type}
+                                                </span>
+                                            </div>
+                                            <div class="mt-3 flex items-center justify-between">
+                                                <p class="text-xs text-slate-500">
+                                                    <span class="font-medium text-slate-700">{areaId ? formatRp(unitPrice(p)) : formatRp(p.price)}</span>
+                                                    <span class="text-slate-400"> / {p.unit}</span>
+                                                </p>
+                                                <div class="flex items-center gap-2">
+                                                    <button onclick={() => changeQty(p.id, -1)} class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-200 disabled:opacity-40" disabled={!quantities[p.id]}>−</button>
+                                                    <span class="w-7 text-center text-sm font-bold text-slate-800">{quantities[p.id] ?? 0}</span>
+                                                    <button onclick={() => changeQty(p.id, 1)} class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white transition hover:bg-primary-700">+</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {/each}
                                 </div>
                             </div>
-                        {/each}
-                    </div>
+                        {/if}
+                    {/each}
                 {/if}
             </div>
 

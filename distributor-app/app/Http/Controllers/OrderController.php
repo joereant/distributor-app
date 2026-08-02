@@ -41,7 +41,7 @@ class OrderController extends Controller
 
     public function create()
     {
-        $products = Product::orderBy('name')->get();
+        $products = Product::where('is_active', true)->orderBy('name')->get();
         $areas = Area::orderBy('name')->get();
         $plant = Plant::first();
         $shippingRates = [];
