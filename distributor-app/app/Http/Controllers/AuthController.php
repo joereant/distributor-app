@@ -75,9 +75,7 @@ class AuthController extends Controller
 
         Auth::logout();
 
-        return redirect('/login')->with('flash', [
-            'message' => "Pendaftaran berhasil, {$user->name}! Akun Anda menunggu persetujuan admin.",
-        ]);
+        return redirect('/login')->with('message', "Pendaftaran berhasil, {$user->name}! Akun Anda menunggu persetujuan admin.");
     }
 
     public function redirectToGoogle()
@@ -91,9 +89,7 @@ class AuthController extends Controller
             $googleUser = Socialite::driver('google')->user();
         } catch (\Throwable $e) {
             Log::error('Google login failed: '.$e->getMessage());
-            return redirect('/login')->with('flash', [
-                'error' => 'Gagal login dengan Google. Silakan coba lagi.',
-            ]);
+            return redirect('/login')->with('error', 'Gagal login dengan Google. Silakan coba lagi.');
         }
 
         $user = User::where('email', $googleUser->getEmail())->first();
@@ -109,15 +105,11 @@ class AuthController extends Controller
                 'status' => 'pending',
             ]);
 
-            return redirect('/login')->with('flash', [
-                'message' => 'Akun Google terdaftar sebagai customer. Tunggu persetujuan admin sebelum login.',
-            ]);
+            return redirect('/login')->with('message', 'Akun Google terdaftar sebagai customer. Tunggu persetujuan admin sebelum login.');
         }
 
         if ($user->status !== 'active') {
-            return redirect('/login')->with('flash', [
-                'error' => 'Akun belum aktif. Hubungi admin.',
-            ]);
+            return redirect('/login')->with('error', 'Akun belum aktif. Hubungi admin.');
         }
 
         $user->forceFill([

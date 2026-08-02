@@ -30,8 +30,8 @@
         ],
         admin: [
             { label: 'Dashboard', href: '/admin', icon: 'home' },
-            { label: 'User', href: null, icon: 'users' },
-            { label: 'Order', href: null, icon: 'cart' },
+            { label: 'User', href: '/admin/users', icon: 'users' },
+            { label: 'Order', href: '/admin/orders', icon: 'cart' },
             { label: 'Laporan', href: null, icon: 'chart' },
         ],
         sales: [
@@ -41,7 +41,7 @@
         ],
         customer: [
             { label: 'Dashboard', href: '/customer', icon: 'home' },
-            { label: 'Order', href: null, icon: 'cart' },
+            { label: 'Order', href: '/customer/order', icon: 'cart' },
             { label: 'Riwayat', href: null, icon: 'history' },
         ],
     };

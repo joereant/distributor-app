@@ -10,7 +10,19 @@ class CheckRole
 {
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if (! $request->user() || ! in_array($request->user()->role, $roles)) {
+        $user = $request->user();
+
+        if (! $user) {
+            abort(403);
+        }
+
+        $allowed = in_array($user->role, $roles);
+
+        if (! $allowed && $user->role === 'owner' && count(array_intersect($roles, ['admin', 'sales'])) > 0) {
+            $allowed = true;
+        }
+
+        if (! $allowed) {
             abort(403);
         }
 
