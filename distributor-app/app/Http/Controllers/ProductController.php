@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Area;
 use App\Models\Category;
+use App\Models\Plant;
 use App\Models\Product;
 use App\Models\ProductPrice;
 use Illuminate\Http\Request;
@@ -12,6 +14,17 @@ use Illuminate\Validation\Rule;
 class ProductController extends Controller
 {
     public function index(Request $request)
+    {
+        $tab = $request->get('tab', 'products');
+
+        if ($tab === 'prices') {
+            return $this->pricesTab($request);
+        }
+
+        return $this->productsTab($request);
+    }
+
+    private function productsTab(Request $request)
     {
         $products = Product::with('category')
             ->when($request->search, fn ($q) => $q->where('name', 'like', "%{$request->search}%")
@@ -28,6 +41,47 @@ class ProductController extends Controller
             'products' => $products,
             'categories' => $categories,
             'filters' => $request->only(['search', 'category', 'active']),
+            'tab' => 'products',
+        ]);
+    }
+
+    private function pricesTab(Request $request)
+    {
+        $plantId = $request->get('plant');
+
+        // Get all active plants
+        $plants = Plant::orderBy('name')->get(['id', 'name', 'location']);
+
+        // Default plant
+        $selectedPlant = $plantId
+            ? Plant::find($plantId)
+            : Plant::first();
+
+        // All areas
+        $areas = Area::orderBy('name')->get(['id', 'name', 'code']);
+
+        // All active products grouped by category
+        $products = Product::with('category')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        $groupedProducts = $products->groupBy(fn ($p) => $p->category?->name ?? 'Tanpa Kategori')
+            ->sortBy(fn ($_, $k) => $k);
+
+        // Price matrix: product_id × area_id → price
+        $prices = ProductPrice::when($selectedPlant, fn ($q) => $q->where('plant_id', $selectedPlant->id))
+            ->get()
+            ->keyBy(fn ($p) => "{$p->product_id}_{$p->area_id}");
+
+        return inertia('Admin/Product/Index', [
+            'tab' => 'prices',
+            'plants' => $plants,
+            'selected_plant' => $selectedPlant,
+            'areas' => $areas,
+            'grouped_products' => $groupedProducts,
+            'prices' => $prices,
+            'filters' => ['plant' => $selectedPlant?->id],
         ]);
     }
 
@@ -109,5 +163,30 @@ class ProductController extends Controller
         $product->delete();
 
         return redirect('/admin/products')->with('message', "Produk '{$product->name}' berhasil dihapus.");
+    }
+
+    public function savePrices(Request $request)
+    {
+        $data = $request->validate([
+            'plant_id' => ['required', 'exists:plants,id'],
+            'prices' => ['required', 'array'],
+            'prices.*' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $plantId = $data['plant_id'];
+        $prices = $data['prices']; // [product_id][area_id] => price
+
+        foreach ($prices as $productId => $areaPrices) {
+            foreach ($areaPrices as $areaId => $price) {
+                if ($price === null || $price === '') continue;
+
+                ProductPrice::updateOrCreate(
+                    ['product_id' => $productId, 'area_id' => $areaId],
+                    ['plant_id' => $plantId, 'price' => $price]
+                );
+            }
+        }
+
+        return back()->with('message', 'Daftar harga berhasil disimpan.');
     }
 }
