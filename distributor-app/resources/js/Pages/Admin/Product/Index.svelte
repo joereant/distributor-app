@@ -132,6 +132,13 @@
             ? page.props.categories ?? []
             : (page.props.categories ?? [])
     );
+
+    // Kategori tab: unwrap paginated response
+    const catList = $derived(
+        Array.isArray(page.props.categories)
+            ? page.props.categories
+            : (page.props.categories?.data ?? [])
+    );
 </script>
 
 <AppLayout>
@@ -341,11 +348,11 @@
 
             <!-- List -->
             <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200">
-                {#if allCategories.length === 0}
+                {#if catList.length === 0}
                     <p class="px-5 py-12 text-center text-sm text-slate-400">Belum ada kategori.</p>
                 {:else}
                     <ul class="divide-y divide-slate-100">
-                        {#each allCategories as c (c.id)}
+                        {#each catList as c (c.id)}
                             <li class="flex items-center gap-4 px-5 py-3.5 {!c.is_active ? 'opacity-50' : ''}">
                                 <!-- Icon -->
                                 <div class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
