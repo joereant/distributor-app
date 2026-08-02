@@ -9,7 +9,29 @@
     const user = $derived(page.props.auth?.user);
     const role = $derived(user?.role ?? 'customer');
 
-    let collapsed = $state(localStorage.getItem('sentrax_sidebar_collapsed') !== 'true');
+    // Sidebar auto-collapse: expand ≥ 1536 (2xl), collapse < 1536
+    // Manual toggle → stored in localStorage, overrides breakpoint default
+    function getBreakpointDefault() {
+        return window.innerWidth < 1536;
+    }
+
+    let userToggled = $state(localStorage.getItem('sentrax_sidebar_toggled') === 'true');
+    let collapsed = $state(
+        userToggled
+            ? localStorage.getItem('sentrax_sidebar_collapsed') === 'true'
+            : getBreakpointDefault()
+    );
+
+    $effect(() => {
+        function handleResize() {
+            if (!userToggled) {
+                collapsed = getBreakpointDefault();
+            }
+        }
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    });
+
     let userMenuOpen = $state(false);
 
     $effect(() => {
@@ -47,6 +69,8 @@
 
     function toggle() {
         collapsed = !collapsed;
+        userToggled = true;
+        localStorage.setItem('sentrax_sidebar_toggled', 'true');
         localStorage.setItem('sentrax_sidebar_collapsed', String(collapsed));
     }
 
@@ -65,7 +89,7 @@
     }
 </script>
 
-<div class="min-h-screen">
+<div class="mx-auto min-h-screen max-w-[1920px]">
     <!-- Mobile top bar -->
     <header class="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
         <div class="flex items-center gap-2.5">
@@ -77,8 +101,8 @@
         </div>
     </header>
 
-    <!-- Desktop sidebar -->
-    <aside class="fixed inset-y-0 left-0 z-30 hidden flex-col bg-gradient-to-b from-primary-700 via-primary-800 to-primary-900 text-white transition-[width] duration-200 lg:flex {collapsed ? 'w-15' : 'w-56'}">
+    <!-- Desktop sidebar: fixed, stays on scroll -->
+    <aside class="fixed inset-y-0 left-0 z-30 hidden h-screen flex-col bg-gradient-to-b from-primary-700 via-primary-800 to-primary-900 text-white transition-[width] duration-200 lg:flex {collapsed ? 'w-15' : 'w-56'}">
         <div class="flex h-16 items-center justify-center">
             <button onclick={toggle} class="flex items-center gap-2.5 rounded-lg transition hover:bg-white/10 {collapsed ? 'p-1.5' : 'px-3 py-1.5'}" title={collapsed ? 'Perluas menu' : 'Lipat menu'}>
                 <Logo tone="light" size="md" showText={!collapsed} />
@@ -121,9 +145,9 @@
         </div>
     </aside>
 
-    <!-- Main -->
+    <!-- Main content -->
     <div class="transition-[padding] duration-200 {collapsed ? 'lg:pl-15' : 'lg:pl-56'}">
-        <main class="px-4 py-5 pb-24 lg:px-8 lg:py-8 lg:pb-8">
+        <main class="mx-auto w-full max-w-7xl px-4 py-5 pb-24 lg:px-8 lg:py-8 lg:pb-8">
             {@render children?.()}
         </main>
     </div>

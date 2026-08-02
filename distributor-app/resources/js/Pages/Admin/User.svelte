@@ -30,7 +30,7 @@
 </script>
 
 <AppLayout>
-    <div class="mx-auto max-w-7xl">
+    <div>
         <header class="mb-6">
             <h2 class="text-xl font-bold text-slate-800">Kelola User</h2>
             <p class="mt-0.5 text-sm text-slate-500">Setujui akun customer yang mendaftar.</p>

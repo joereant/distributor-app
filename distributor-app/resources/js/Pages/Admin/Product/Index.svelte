@@ -142,7 +142,7 @@
 </script>
 
 <AppLayout>
-    <div class="mx-auto max-w-7xl">
+    <div>
         <!-- Flash -->
         {#if flash}
             <div class="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 ring-1 ring-emerald-100">{flash}</div>
