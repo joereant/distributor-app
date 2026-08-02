@@ -10,7 +10,7 @@
 
 ### 1. Cover
 - Judul besar: **DistributorApp**
-- Subjudul: Aplikasi Manajemen Distributor Semen — Order Online, Estimasi Ongkir, & Monitoring Penjualan
+- Subjudul: Aplikasi Manajemen Distributor Semen — Order Online, Estimasi Ongkir, & Monitoring Penjualan dengan proyeksi margin tiap transaksi
 - Footer: Proposal Penawaran — JR Logix
 - Gaya: clean, profesional, latar terang, aksen merah + kuning
 
@@ -36,13 +36,13 @@
 ### 5. Solusi: DistributorApp
 - Satu aplikasi: customer order sendiri, sales fokus area, admin & owner kontrol penuh
 - Hitungan transaksi transparan: produk + ongkir
-- Nilai plus: **estimasi cuan/rugi per order**
+- Nilai plus: **proyeksi margin per transaksi**
 
 ### 6. Alur Bisnis
 - Customer order (pilih produk + input tujuan)
 - Sistem hitung estimasi ongkir
 - Total transaksi (produk + ongkir)
-- Admin approve + lihat estimasi cuan/rugi
+- Admin approve + lihat proyeksi margin
 - Order diproses & dikirim
 - Semua panel memantau status real-time
 - Bisa digambar sebagai diagram 6 langkah panah
@@ -59,7 +59,7 @@
 - Produk, harga jual, harga beli, harga per area
 - Area & tarif ongkir
 - Kelola customer
-- Approve order + estimasi cuan/rugi
+- Approve order + proyeksi margin
 - Sistem referal
 - Laporan
 
@@ -82,7 +82,7 @@
 - 4 role + dashboard
 - Katalog & harga per area
 - Order online dengan estimasi ongkir
-- Estimasi cuan/rugi saat approve
+- Proyeksi margin saat persetujuan order
 - Sistem referal
 - Approve order oleh admin
 - Monitoring status semua panel
@@ -95,8 +95,8 @@
 - Laporan lengkap (Excel/PDF) + audit trail
 
 ### 13. Upgrade Level 2 — Enterprise
-- Integrasi produsen (sinkron harga & PO)
-- Tracking pengiriman real-time
+- Integrasi jasa pengiriman: ongkir akurat & tracking resi real-time
+- Notifikasi otomatis (WhatsApp/Email): status order & piutang
 - Multi-gudang & manajemen stok
 
 ### 14. Teknologi & Keamanan
@@ -113,9 +113,9 @@
 - Go live + pendampingan
 
 ### 16. Paket & Biaya
-- Biaya setup (sekali)
-- Langganan bulanan (berisi fitur Fase 1)
-- Upgrade level 1 & 2 (tambahan)
+- Base (Fitur Fase 1): ~~Rp 35.000.000~~ → **Rp 29.999.999**
+- Upgrade Level 1 — Business: **Rp 38.000.000**
+- Upgrade Level 2 — Enterprise: **Rp 45.000.000**
 
 ### 17. Penutup / CTA
 - "Siap tingkatkan operasional distributor Anda?"
@@ -152,8 +152,8 @@ ATURAN ISI
 
 STRUKTUR (ikuti persis 17 bagian ini):
 1. Cover — judul DistributorApp, subjudul "Aplikasi Manajemen Distributor Semen —
-   Order Online, Estimasi Ongkir, & Monitoring Penjualan", footer "Proposal
-   Penawaran — JR Logix".
+   Order Online, Estimasi Ongkir, & Monitoring Penjualan dengan proyeksi margin
+   tiap transaksi", footer "Proposal Penawaran — JR Logix".
 2. Agenda
 3. Tentang JR Logix
 4. Masalah di Bisnis Distributor
@@ -168,7 +168,8 @@ STRUKTUR (ikuti persis 17 bagian ini):
 13. Upgrade Level 2 — Enterprise
 14. Teknologi & Keamanan
 15. Proses Implementasi
-16. Paket & Biaya (dengan placeholder harga)
+16. Paket & Biaya (base ~~Rp 35.000.000~~ → Rp 29.999.999; Business Rp 38.000.000;
+    Enterprise Rp 45.000.000)
 17. Penutup / CTA
 
 LAYOUT PER SLIDE

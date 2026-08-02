@@ -78,7 +78,7 @@ DistributorApp/
 Customer order (pilih produk + input tujuan kirim)
   → sistem hitung estimasi ongkir (produk + ongkir = total)
   → submit → status PENDING
-  → Admin approve + lihat estimasi cuan/rugi
+  → Admin approve + lihat proyeksi margin
   → APPROVED → diproses & dikirim → status DONE
   → semua panel memantau status real-time
 ```
@@ -86,11 +86,11 @@ Customer order (pilih produk + input tujuan kirim)
 ## Modules (rencana)
 1. **Auth & User Management** — login Google (Gmail) + manual, registrasi, verifikasi admin, role (owner, admin, sales, customer)
 2. **Master Data** — produk, harga per area, harga beli, customer, area, ongkir, kategori
-3. **Transaksi Penjualan** — order online customer, approve admin, hitung total (produk + ongkir), estimasi cuan/rugi
+3. **Transaksi Penjualan** — order online customer, approve admin, hitung total (produk + ongkir), proyeksi margin
 4. **Sistem Referal** — lacak customer yang beli via non-sales
 5. **Dashboard & Monitoring** — ringkasan penjualan, transaksi terbaru, status per panel
 6. **Laporan** — rekap penjualan dasar (export)
-7. **Fitur Upgrade (L1/L2)** — analisa transaksi, piutang & kredit, target komisi, integrasi produsen, tracking pengiriman, multi-gudang
+7. **Fitur Upgrade (L1/L2)** — analisa transaksi, piutang & kredit, target komisi, integrasi jasa pengiriman, notifikasi otomatis, multi-gudang
 
 ## Panel & Role
 | Panel | Role | Akses |
@@ -125,7 +125,7 @@ Customer order (pilih produk + input tujuan kirim)
 - Manajemen Produk & Harga (Admin): CRUD produk, set harga per area, harga beli
 - Area & Ongkir (Admin): CRUD area + tarif ongkir Franco
 - Order Online (Customer): pilih produk, input tujuan, hitung ongkir otomatis, total = produk + ongkir
-- Approve Order (Admin): review pending order + estimasi cuan/rugi (fitur standar)
+- Approve Order (Admin): review pending order + proyeksi margin (fitur standar)
 - Sistem Referal: lacak customer beli via non-sales
 - Monitoring Status: transaksi terlihat di semua panel
 - Laporan penjualan dasar
@@ -138,8 +138,8 @@ Customer order (pilih produk + input tujuan kirim)
 - Laporan lengkap (export Excel/PDF) + audit trail
 
 ### Level 2 — Enterprise
-- Integrasi produsen (sinkronisasi harga & PO)
-- Tracking pengiriman real-time
+- Integrasi jasa pengiriman (API ekspedisi: ongkir akurat & tracking resi real-time)
+- Notifikasi otomatis (WhatsApp/Email): status order & piutang
 - Multi-gudang & manajemen stok
 
 ## Auth Approach
@@ -148,5 +148,29 @@ Customer order (pilih produk + input tujuan kirim)
 - Verifikasi admin wajib sebelum akun aktif
 - Role-based access via middleware `CheckRole`
 
+## Breakpoint & Responsive (referensi)
+Basis breakpoint Tailwind default. **Satu titik transisi `lg` (1024px)** — konsisten di semua halaman (panel & auth).
+
+### Panel (sidebar / bottom-nav)
+| Breakpoint | Target layar | Sidebar | Top bar | Bottom nav | Main content |
+|---|---|---|---|---|---|
+| < 640px | HP kecil | — | sticky | max 5 item | px-4 py-5 pb-24 |
+| sm (640–767) | HP besar | — | sticky | max 5 item | px-5 pb-24 |
+| md (768–1023) | Tablet portrait | — | sticky | max 5 item | px-6 pb-24 |
+| lg (1024–1279) | Tablet landscape / laptop kecil | collapsed default `w-20` | — | — | lg:pl-20 + px-8 |
+| xl (1280–1535) | Laptop | bebas expand `w-64` | — | — | lg:pl-64 + px-8 |
+| 2xl (1536+) | Desktop besar / 4K | bebas | — | — | px-8 + max-w-7xl mx-auto |
+
+### Aturan menu (simple & premium)
+- Maksimal **5 menu per role**; **Dashboard wajib**.
+- Sidebar collapsed → ikon besar center; bottom-nav → 5 slot merata.
+- Tidak ada submenu berlapis.
+
+### Auth (login/register)
+| Breakpoint | Layout |
+|---|---|
+| < lg | Stack vertikal: brand panel atas (min-h-260px) + form bawah |
+| ≥ lg | Split 2 kolom: brand panel kiri (min-h-screen) + form kanan center |
+
 ## Status
-Final — desain fitur & panel sudah disepakati. Scaffold Laravel belum berjalan (public/, bootstrap.js, app.blade.php, svelte.config.js belum ada; composer/npm belum diinstall).
+Final — desain fitur & panel sudah disepakati. Scaffold Laravel sudah jalan (Sesi 22): auth lengkap (login manual + Google + register), layout per role sidebar/bottom-nav (Sesi 23).
