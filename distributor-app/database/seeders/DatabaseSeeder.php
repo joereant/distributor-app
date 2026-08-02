@@ -12,6 +12,7 @@ class DatabaseSeeder extends Seeder
             AreaSeeder::class,
             UserSeeder::class,
             BusinessSeeder::class,
+            TransactionSeeder::class,
         ]);
     }
 }

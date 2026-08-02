@@ -17,7 +17,7 @@ class OrderController extends Controller
 {
     public function index()
     {
-        $transactions = Transaction::with(['customer', 'items.product'])
+        $transactions = Transaction::with(['customer.area', 'items.product'])
             ->orderByDesc('transaction_date')
             ->limit(50)
             ->get();

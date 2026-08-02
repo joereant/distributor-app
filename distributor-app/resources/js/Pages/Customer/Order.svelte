@@ -13,8 +13,17 @@
 
     let areaId = $state('');
     let quantities = $state({});
+    let query = $state('');
 
     const rateByArea = $derived(Object.fromEntries(shippingRates.map((r) => [String(r.area_id), Number(r.rate)])));
+
+    const filtered = $derived(
+        products.filter((p) => {
+            const q = query.trim().toLowerCase();
+            if (!q) return true;
+            return p.name.toLowerCase().includes(q) || (p.code ?? '').toLowerCase().includes(q);
+        })
+    );
 
     const selected = $derived(
         products
@@ -33,7 +42,7 @@
     }
 
     function formatRp(value) {
-        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value);
+        return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
     }
 
     function changeQty(id, delta) {
@@ -62,66 +71,92 @@
             <div class="mb-6 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700 ring-1 ring-emerald-100">{flash}</div>
         {/if}
 
-        <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div class="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
             <div class="space-y-4 lg:col-span-2">
-                {#each products as p (p.id)}
-                    <div class="flex items-center justify-between gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200">
-                        <div class="min-w-0">
-                            <p class="font-semibold text-slate-800">{p.name}</p>
-                            <p class="mt-0.5 text-sm text-slate-500">{formatRp(unitPrice(p))} / {p.unit}</p>
-                        </div>
-                        <div class="flex shrink-0 items-center gap-3">
-                            <button onclick={() => changeQty(p.id, -1)} class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-200">−</button>
-                            <span class="w-8 text-center text-sm font-bold text-slate-800">{quantities[p.id] ?? 0}</span>
-                            <button onclick={() => changeQty(p.id, 1)} class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white transition hover:bg-primary-700">+</button>
-                        </div>
-                    </div>
-                {/each}
-            </div>
-
-            <DashboardCard title="Ringkasan Pesanan">
-                <div class="space-y-4">
-                    <div>
-                        <label for="order-area" class="mb-1 block text-xs font-medium text-slate-500">Tujuan Kirim (Area)</label>
-                        <select id="order-area" bind:value={areaId} class="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-800 focus:border-primary-500 focus:outline-none">
+                <div class="flex flex-col gap-3 sm:flex-row">
+                    <label class="flex-1">
+                        <span class="mb-1 block text-xs font-medium text-slate-500">Tujuan Kirim (Area)</span>
+                        <select id="order-area" bind:value={areaId} class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm transition focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100">
                             <option value="">Pilih area…</option>
                             {#each areas as a (a.id)}
                                 <option value={a.id}>{a.name}</option>
                             {/each}
                         </select>
-                    </div>
-
-                    {#if selected.length > 0}
-                        <ul class="space-y-2 border-t border-slate-100 pt-3">
-                            {#each selected as p (p.id)}
-                                <li class="flex items-center justify-between gap-2 text-sm">
-                                    <span class="min-w-0 truncate text-slate-600">{p.qty}× {p.name}</span>
-                                    <span class="shrink-0 font-medium text-slate-800">{formatRp(unitPrice(p) * p.qty)}</span>
-                                </li>
-                            {/each}
-                        </ul>
-                    {/if}
-
-                    <dl class="space-y-1.5 border-t border-slate-100 pt-3 text-sm">
-                        <div class="flex justify-between text-slate-600">
-                            <dt>Subtotal</dt>
-                            <dd class="font-medium text-slate-800">{formatRp(subtotal)}</dd>
-                        </div>
-                        <div class="flex justify-between text-slate-600">
-                            <dt>Ongkir</dt>
-                            <dd class="font-medium text-slate-800">{rate > 0 ? formatRp(ongkir) + ' · ' + rate.toLocaleString('id-ID') + '/zak × ' + totalQty : formatRp(0)}</dd>
-                        </div>
-                        <div class="flex justify-between border-t border-slate-100 pt-2 text-base font-bold text-slate-900">
-                            <dt>Total</dt>
-                            <dd>{formatRp(total)}</dd>
-                        </div>
-                    </dl>
-
-                    <button onclick={submit} disabled={!areaId || selected.length === 0} class="w-full rounded-xl bg-primary-600 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-40">
-                        Buat Pesanan
-                    </button>
+                    </label>
+                    <label class="flex-1">
+                        <span class="mb-1 block text-xs font-medium text-slate-500">Cari Produk</span>
+                        <input bind:value={query} type="search" placeholder="Cari nama / kode produk…" class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 shadow-sm transition placeholder:text-slate-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-100" />
+                    </label>
                 </div>
-            </DashboardCard>
+
+                {#if filtered.length === 0}
+                    <p class="rounded-xl bg-white py-12 text-center text-sm text-slate-400 ring-1 ring-slate-200">Produk tidak ditemukan.</p>
+                {:else}
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        {#each filtered as p (p.id)}
+                            <div class="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-200 transition hover:shadow-md">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="min-w-0">
+                                        <p class="truncate font-semibold text-slate-800">{p.name}</p>
+                                        <p class="mt-0.5 text-xs text-slate-400">{p.code}</p>
+                                    </div>
+                                    <span class="shrink-0 rounded-full bg-primary-50 px-2 py-0.5 text-[11px] font-semibold text-primary-700 ring-1 ring-primary-100">
+                                        {areaId ? formatRp(unitPrice(p)) : formatRp(p.price)}
+                                    </span>
+                                </div>
+                                <div class="mt-4 flex items-center justify-between">
+                                    <p class="text-xs text-slate-500">Harga /{p.unit} <span class="font-medium text-slate-700">{areaId ? 'untuk area dipilih' : 'harga dasar'}</span></p>
+                                    <div class="flex items-center gap-2">
+                                        <button onclick={() => changeQty(p.id, -1)} class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition hover:bg-slate-200 disabled:opacity-40" disabled={!quantities[p.id]}>−</button>
+                                        <span class="w-7 text-center text-sm font-bold text-slate-800">{quantities[p.id] ?? 0}</span>
+                                        <button onclick={() => changeQty(p.id, 1)} class="flex h-8 w-8 items-center justify-center rounded-lg bg-primary-600 text-white transition hover:bg-primary-700">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        {/each}
+                    </div>
+                {/if}
+            </div>
+
+            <div class="lg:sticky lg:top-8">
+                <DashboardCard title="Ringkasan Pesanan">
+                    <div class="space-y-4">
+                        {#if !areaId}
+                            <p class="rounded-lg bg-accent-50 px-3 py-2 text-xs font-medium text-accent-700 ring-1 ring-accent-100">Pilih area tujuan kirim dulu — harga & ongkir menyesuaikan.</p>
+                        {/if}
+
+                        {#if selected.length > 0}
+                            <ul class="space-y-2 border-t border-slate-100 pt-3">
+                                {#each selected as p (p.id)}
+                                    <li class="flex items-center justify-between gap-2 text-sm">
+                                        <span class="min-w-0 truncate text-slate-600">{p.qty}× {p.name}</span>
+                                        <span class="shrink-0 font-medium text-slate-800">{formatRp(unitPrice(p) * p.qty)}</span>
+                                    </li>
+                                {/each}
+                            </ul>
+                        {/if}
+
+                        <dl class="space-y-1.5 border-t border-slate-100 pt-3 text-sm">
+                            <div class="flex justify-between text-slate-600">
+                                <dt>Subtotal</dt>
+                                <dd class="font-medium text-slate-800">{formatRp(subtotal)}</dd>
+                            </div>
+                            <div class="flex justify-between text-slate-600">
+                                <dt>Ongkir</dt>
+                                <dd class="font-medium text-slate-800">{rate > 0 ? `${formatRp(ongkir)} · ${rate.toLocaleString('id-ID')}/zak × ${totalQty}` : formatRp(0)}</dd>
+                            </div>
+                            <div class="flex justify-between border-t border-slate-100 pt-2 text-base font-bold text-slate-900">
+                                <dt>Total</dt>
+                                <dd>{formatRp(total)}</dd>
+                            </div>
+                        </dl>
+
+                        <button onclick={submit} disabled={!areaId || selected.length === 0} class="w-full rounded-xl bg-primary-600 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-40">
+                            Buat Pesanan
+                        </button>
+                    </div>
+                </DashboardCard>
+            </div>
         </div>
     </div>
 </AppLayout>

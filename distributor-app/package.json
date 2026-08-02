@@ -17,6 +17,7 @@
     },
     "dependencies": {
         "@inertiajs/svelte": "^3.6.1",
+        "apexcharts": "^6.7.0",
         "axios": "^1.7.0",
         "laravel-vite-plugin": "^3.1.3"
     }

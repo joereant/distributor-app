@@ -24,25 +24,20 @@
     const navByRole = {
         owner: [
             { label: 'Dashboard', href: '/owner', icon: 'home' },
-            { label: 'User', href: null, icon: 'users' },
-            { label: 'Order', href: null, icon: 'cart' },
-            { label: 'Laporan', href: null, icon: 'chart' },
+            { label: 'Order', href: '/admin/orders', icon: 'cart' },
+            { label: 'User', href: '/admin/users', icon: 'users' },
         ],
         admin: [
             { label: 'Dashboard', href: '/admin', icon: 'home' },
-            { label: 'User', href: '/admin/users', icon: 'users' },
             { label: 'Order', href: '/admin/orders', icon: 'cart' },
-            { label: 'Laporan', href: null, icon: 'chart' },
+            { label: 'User', href: '/admin/users', icon: 'users' },
         ],
         sales: [
             { label: 'Dashboard', href: '/sales', icon: 'home' },
-            { label: 'Transaksi', href: null, icon: 'monitor' },
-            { label: 'Referal', href: null, icon: 'referral' },
         ],
         customer: [
             { label: 'Dashboard', href: '/customer', icon: 'home' },
             { label: 'Order', href: '/customer/order', icon: 'cart' },
-            { label: 'Riwayat', href: null, icon: 'history' },
         ],
     };
 
@@ -90,27 +85,16 @@
 
         <nav class="flex flex-1 flex-col overflow-y-auto {collapsed ? 'items-center justify-center gap-3.5 py-3' : 'justify-start space-y-3.5 px-3 pt-4 pb-2'}">
             {#each nav as item (item.label)}
-                {#if item.href}
-                    <a
-                        href={item.href}
-                        title={collapsed ? item.label : undefined}
-                        class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {isActive(item.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
-                    >
-                        <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'}" />
-                        {#if !collapsed}
-                            <span class="flex-1 text-left text-sm">{item.label}</span>
-                            <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-normal text-white/50">Segera</span>
-                        {/if}
-                    </a>
-                {:else}
-                    <button type="button" disabled title={item.label} class="flex cursor-not-allowed items-center rounded-lg text-white/40 {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'}">
-                        <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'}" />
-                        {#if !collapsed}
-                            <span class="flex-1 text-left text-sm">{item.label}</span>
-                            <span class="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-normal text-white/50">Segera</span>
-                        {/if}
-                    </button>
-                {/if}
+                <a
+                    href={item.href}
+                    title={collapsed ? item.label : undefined}
+                    class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {isActive(item.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
+                >
+                    <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'}" />
+                    {#if !collapsed}
+                        <span class="flex-1 text-left text-sm">{item.label}</span>
+                    {/if}
+                </a>
             {/each}
         </nav>
 
@@ -146,17 +130,10 @@
     <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white lg:hidden">
         <div class="flex justify-around">
             {#each nav as item (item.label)}
-                {#if item.href}
-                    <a href={item.href} class="flex flex-col items-center gap-1 py-2.5 text-[10px] transition {isActive(item.href) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}">
-                        <Icon name={item.icon} class="h-5 w-5" />
-                        <span class="leading-none">{item.label}</span>
-                    </a>
-                {:else}
-                    <button type="button" disabled class="flex flex-col items-center gap-1 py-2.5 text-[10px] text-slate-400">
-                        <Icon name={item.icon} class="h-5 w-5" />
-                        <span class="leading-none">{item.label}</span>
-                    </button>
-                {/if}
+                <a href={item.href} class="flex flex-col items-center gap-1 py-2.5 text-[10px] transition {isActive(item.href) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}">
+                    <Icon name={item.icon} class="h-5 w-5" />
+                    <span class="leading-none">{item.label}</span>
+                </a>
             {/each}
         </div>
     </nav>
