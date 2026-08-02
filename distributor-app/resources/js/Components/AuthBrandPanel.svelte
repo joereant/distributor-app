@@ -1,13 +1,14 @@
+<script>
+    import Logo from './Logo.svelte';
+</script>
+
 <aside class="relative overflow-hidden bg-gradient-to-br from-primary-700 via-primary-800 to-primary-900 text-white">
     <div class="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-accent-500/20 blur-3xl"></div>
     <div class="pointer-events-none absolute -bottom-32 -left-20 h-80 w-80 rounded-full bg-teal-300/10 blur-3xl"></div>
     <div class="pointer-events-none absolute top-1/3 left-1/2 h-40 w-40 -translate-x-1/2 rounded-full bg-white/5 blur-2xl"></div>
 
     <div class="relative flex min-h-[260px] flex-col justify-between gap-8 px-6 py-10 lg:min-h-screen lg:px-12 lg:py-16">
-        <div class="flex items-center gap-2.5">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-white font-extrabold text-primary-700 shadow">DA</div>
-            <span class="text-sm font-bold tracking-tight">DistributorApp</span>
-        </div>
+        <Logo size="sm" />
 
         <div class="flex items-center gap-3">
             <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border-2 border-dashed border-white/40 bg-white/5 text-[10px] font-medium text-white/60">Logo</div>

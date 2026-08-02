@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'name' => env('APP_NAME', 'DistributorApp'),
+    'name' => env('APP_NAME', 'SentraX'),
     'env' => env('APP_ENV', 'local'),
     'debug' => (bool) env('APP_DEBUG', true),
     'url' => env('APP_URL', 'http://localhost'),

@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ config('app.name', 'DistributorApp') }}</title>
+    <link rel="icon" type="image/svg+xml" href="/images/Icon.svg">
+    <title>{{ config('app.name', 'SentraX') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @inertiaHead
 </head>
