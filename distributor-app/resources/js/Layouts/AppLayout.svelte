@@ -62,7 +62,8 @@
             { label: 'Area', href: '/admin/areas', icon: 'map' },
             { label: 'Pabrik', href: '/admin/plants', icon: 'factory' },
             { label: 'Ongkir', href: '/admin/shipping-rates', icon: 'truck' },
-            { label: 'User', href: '/admin/users', icon: 'users' },
+            { label: 'Customer', href: '/admin/customers', icon: 'building' },
+            { label: 'User', href: '/admin/users-manage', icon: 'users' },
         ],
         admin: [
             { label: 'Dashboard', href: '/admin', icon: 'home' },
@@ -71,7 +72,8 @@
             { label: 'Area', href: '/admin/areas', icon: 'map' },
             { label: 'Pabrik', href: '/admin/plants', icon: 'factory' },
             { label: 'Ongkir', href: '/admin/shipping-rates', icon: 'truck' },
-            { label: 'User', href: '/admin/users', icon: 'users' },
+            { label: 'Customer', href: '/admin/customers', icon: 'building' },
+            { label: 'User', href: '/admin/users-manage', icon: 'users' },
         ],
         sales: [
             { label: 'Dashboard', href: '/sales', icon: 'home' },

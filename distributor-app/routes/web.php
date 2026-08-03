@@ -7,6 +7,8 @@ use App\Http\Controllers\AreaController;
 use App\Http\Controllers\ShippingRateController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +35,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/users', [UserController::class, 'index']);
         Route::post('/admin/users/{user}/approve', [UserController::class, 'approve']);
         Route::post('/admin/users/{user}/reject', [UserController::class, 'reject']);
+
+        // User Management
+        Route::get('/admin/users-manage', [UserManagementController::class, 'index']);
+        Route::post('/admin/users-manage', [UserManagementController::class, 'store']);
+        Route::put('/admin/users-manage/{user}', [UserManagementController::class, 'update']);
+        Route::delete('/admin/users-manage/{user}', [UserManagementController::class, 'destroy']);
+
+        // Customers
+        Route::get('/admin/customers', [CustomerController::class, 'index']);
+        Route::post('/admin/customers', [CustomerController::class, 'store']);
+        Route::put('/admin/customers/{customer}', [CustomerController::class, 'update']);
+        Route::delete('/admin/customers/{customer}', [CustomerController::class, 'destroy']);
 
         // Products
         Route::get('/admin/products', [ProductController::class, 'index']);
