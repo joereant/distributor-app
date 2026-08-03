@@ -1,5 +1,5 @@
 <script>
-    import { useForm, usePage } from '@inertiajs/svelte';
+    import { useForm, usePage, Link } from '@inertiajs/svelte';
     import AuthBrandPanel from '../../Components/AuthBrandPanel.svelte';
 
     const page = usePage();
@@ -86,7 +86,7 @@
             </form>
 
             <p class="mt-5 text-center text-sm text-slate-600">
-                Belum punya akun? <a href="/register" class="font-medium text-primary-600 hover:text-primary-700">Daftar</a>
+                Belum punya akun? <Link href="/register" class="font-medium text-primary-600 hover:text-primary-700">Daftar</Link>
             </p>
 
             <p class="mt-6 text-center text-xs leading-relaxed text-slate-400">
