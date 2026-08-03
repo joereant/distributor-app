@@ -1,5 +1,5 @@
 <script>
-    import { usePage } from '@inertiajs/svelte';
+    import { Link, usePage } from '@inertiajs/svelte';
     import AppLayout from '../../Layouts/AppLayout.svelte';
     import DashboardStat from '../../Components/DashboardStat.svelte';
     import DashboardCard from '../../Components/DashboardCard.svelte';
@@ -79,7 +79,7 @@
                                     <td class="py-2.5 text-right font-semibold text-slate-800">{formatRp(t.total)}</td>
                                     <td class="py-2.5 text-right font-medium text-emerald-600">{formatRp(t.margin_estimate)}</td>
                                     <td class="py-2.5 text-right">
-                                        <a href="/admin/orders" class="inline-flex rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-primary-700">Review</a>
+                                        <Link href="/admin/orders" class="inline-flex rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-primary-700">Review</Link>
                                     </td>
                                 </tr>
                             {/each}

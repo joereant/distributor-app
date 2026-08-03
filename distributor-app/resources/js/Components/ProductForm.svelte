@@ -10,16 +10,29 @@
     const isEdit = $derived(!!product?.id);
 
     let form = $state({
-        name: product?.name ?? '',
-        code: product?.code ?? '',
-        description: product?.description ?? '',
-        unit: product?.unit ?? 'zak',
-        packaging_type: product?.packaging_type ?? 'zak',
-        price: product?.price ?? '',
-        harga_beli: product?.harga_beli ?? '',
-        category_id: product?.category_id ?? '',
-        min_stock: product?.min_stock ?? 0,
-        is_active: product?.is_active ?? true,
+        name: '',
+        code: '',
+        description: '',
+        unit: 'zak',
+        packaging_type: 'zak',
+        price: '',
+        harga_beli: '',
+        category_id: '',
+        min_stock: 0,
+        is_active: true,
+    });
+
+    $effect(() => {
+        form.name = product?.name ?? '';
+        form.code = product?.code ?? '';
+        form.description = product?.description ?? '';
+        form.unit = product?.unit ?? 'zak';
+        form.packaging_type = product?.packaging_type ?? 'zak';
+        form.price = product?.price ?? '';
+        form.harga_beli = product?.harga_beli ?? '';
+        form.category_id = product?.category_id ?? '';
+        form.min_stock = product?.min_stock ?? 0;
+        form.is_active = product?.is_active ?? true;
     });
 
     const packagingOptions = [

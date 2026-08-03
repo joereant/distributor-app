@@ -31,7 +31,7 @@
 </script>
 
 <AppLayout>
-    <div class="mx-auto max-w-2xl">
+    <div class="w-full">
         <header class="mb-6 flex flex-col justify-between gap-1 sm:flex-row sm:items-end">
             <div>
                 <h2 class="text-xl font-bold text-slate-800">Kategori</h2>

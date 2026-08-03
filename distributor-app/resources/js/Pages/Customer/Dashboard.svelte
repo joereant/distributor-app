@@ -1,5 +1,5 @@
 <script>
-    import { router, usePage } from '@inertiajs/svelte';
+    import { Link, router, usePage } from '@inertiajs/svelte';
     import AppLayout from '../../Layouts/AppLayout.svelte';
     import DashboardStat from '../../Components/DashboardStat.svelte';
     import DashboardCard from '../../Components/DashboardCard.svelte';
@@ -56,11 +56,11 @@
 
         <div class="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
             <DashboardCard title="Pesan Sekarang" sub="Pilih produk & tujuan kirim, ongkir dihitung otomatis">
-                <a href="/customer/order" class="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-primary-200 bg-primary-50/50 p-8 text-center transition hover:border-primary-400 hover:bg-primary-50">
+                <Link href="/customer/order" class="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-primary-200 bg-primary-50/50 p-8 text-center transition hover:border-primary-400 hover:bg-primary-50">
                     <span class="flex h-12 w-12 items-center justify-center rounded-full bg-primary-600 text-xl font-bold text-white">+</span>
                     <span class="text-sm font-semibold text-primary-700">Buat Pesanan Baru</span>
                     <span class="text-xs text-slate-500">Buka katalog produk & harga sesuai area Anda</span>
-                </a>
+                </Link>
             </DashboardCard>
 
             <DashboardCard title="Riwayat Order" sub="12 transaksi terakhir" class="lg:col-span-2">

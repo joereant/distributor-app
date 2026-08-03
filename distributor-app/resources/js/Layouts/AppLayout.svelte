@@ -1,5 +1,5 @@
 <script>
-    import { router, usePage } from '@inertiajs/svelte';
+    import { Link, router, usePage } from '@inertiajs/svelte';
     import Icon from '../Components/Icon.svelte';
     import Logo from '../Components/Logo.svelte';
 
@@ -9,6 +9,8 @@
     const currentUrl = $derived(page.url);
     const user = $derived(page.props.auth?.user);
     const role = $derived(user?.role ?? 'customer');
+
+    let mobileDrawerOpen = $state(false);
 
     // Sidebar auto-collapse: expand ≥ 1536 (2xl), collapse < 1536
     // Manual toggle → stored in localStorage, overrides breakpoint default
@@ -86,9 +88,9 @@
             { label: 'Dashboard', href: '/owner', icon: 'home' },
             { label: 'Order', href: '/admin/orders', icon: 'cart' },
             { label: 'Produk', icon: 'box', children: [
-                { label: 'Daftar Produk', href: '/admin/products' },
-                { label: 'Kategori', href: '/admin/products/categories' },
-                { label: 'Daftar Harga', href: '/admin/products?tab=prices' },
+                { label: 'Daftar Produk', href: '/admin/products', icon: 'box' },
+                { label: 'Kategori', href: '/admin/products/categories', icon: 'category' },
+                { label: 'Daftar Harga', href: '/admin/products?tab=prices', icon: 'tag' },
             ]},
             { label: 'Area', href: '/admin/areas', icon: 'map' },
             { label: 'Pabrik', href: '/admin/plants', icon: 'factory' },
@@ -101,9 +103,9 @@
             { label: 'Dashboard', href: '/admin', icon: 'home' },
             { label: 'Order', href: '/admin/orders', icon: 'cart' },
             { label: 'Produk', icon: 'box', children: [
-                { label: 'Daftar Produk', href: '/admin/products' },
-                { label: 'Kategori', href: '/admin/products/categories' },
-                { label: 'Daftar Harga', href: '/admin/products?tab=prices' },
+                { label: 'Daftar Produk', href: '/admin/products', icon: 'box' },
+                { label: 'Kategori', href: '/admin/products/categories', icon: 'category' },
+                { label: 'Daftar Harga', href: '/admin/products?tab=prices', icon: 'tag' },
             ]},
             { label: 'Area', href: '/admin/areas', icon: 'map' },
             { label: 'Pabrik', href: '/admin/plants', icon: 'factory' },
@@ -124,6 +126,15 @@
 
     const nav = $derived(navByRole[role] ?? navByRole.customer);
 
+    // Items to show in mobile bottom nav bar (max 4 + 1 "Menu" button)
+    const mobileBottomItems = $derived(nav.slice(0, 4));
+
+    function getItemHref(item) {
+        if (item.href) return item.href;
+        if (item.children && item.children.length > 0) return item.children[0].href;
+        return '#';
+    }
+
     function toggle() {
         collapsed = !collapsed;
         userToggled = true;
@@ -131,20 +142,47 @@
         localStorage.setItem('sentrax_sidebar_collapsed', String(collapsed));
     }
 
-    // Check if any child or parent URL is active
-    function isChildActive(item) {
-        if (!item.children) return false;
-        return item.children.some(c => {
-            if (!c.href) return false;
-            if (currentUrl === c.href) return true;
-            if (c.href === '/admin/products' && currentUrl.startsWith('/admin/products')) return true;
-            return false;
-        });
-    }
-
     function isActive(href) {
         if (!href) return false;
-        return currentUrl === href;
+        const [currentPath, currentQuery] = (currentUrl || '').split('?');
+        const [targetPath, targetQuery] = href.split('?');
+
+        // 1. Target with query params (e.g. /admin/products?tab=prices)
+        if (targetQuery) {
+            return currentPath === targetPath && (currentQuery || '').includes(targetQuery);
+        }
+
+        // 2. Current URL has tab parameter, don't active base route
+        if (currentQuery && currentQuery.includes('tab=')) {
+            return false;
+        }
+
+        // 3. Exact path match
+        if (currentPath === targetPath) {
+            return true;
+        }
+
+        // 4. Base root routes exact match
+        const baseRoutes = ['/', '/admin', '/sales', '/customer', '/owner'];
+        if (baseRoutes.includes(targetPath)) {
+            return false;
+        }
+
+        // 5. Nested child route match (e.g. /admin/products/create)
+        if (currentPath.startsWith(targetPath + '/')) {
+            // Prevent /admin/products from matching sibling route /admin/products/categories
+            if (targetPath === '/admin/products' && currentPath.startsWith('/admin/products/categories')) {
+                return false;
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    function isChildActive(item) {
+        if (!item.children) return false;
+        return item.children.some(c => isActive(c.href));
     }
 
     function initials(name) {
@@ -161,7 +199,16 @@
 <div class="mx-auto min-h-screen max-w-[1920px]">
     <!-- Mobile top bar -->
     <header class="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-3">
+            <button
+                onclick={() => (mobileDrawerOpen = !mobileDrawerOpen)}
+                class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100"
+                aria-label="Toggle menu"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+            </button>
             <Logo size="sm" tone="dark" />
         </div>
         <div class="relative">
@@ -180,7 +227,6 @@
                         {initials(user?.name)}
                     </div>
                 {/if}
-                <!-- Nama: tablet+ only -->
                 <span class="ml-2 hidden max-w-[120px] truncate text-sm font-medium text-slate-700 md:block lg:hidden">{user?.name}</span>
             </button>
             {#if topMenuOpen}
@@ -201,19 +247,95 @@
         </div>
     </header>
 
+    <!-- Mobile Drawer Overlay -->
+    {#if mobileDrawerOpen}
+        <div
+            class="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm transition-opacity lg:hidden"
+            onclick={() => (mobileDrawerOpen = false)}
+            aria-hidden="true"
+        ></div>
+
+        <aside class="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-slate-900 text-white shadow-2xl transition-transform duration-300 lg:hidden">
+            <div class="flex h-16 items-center justify-between border-b border-white/10 px-4">
+                <Logo tone="light" size="md" showText={true} />
+                <button
+                    onclick={() => (mobileDrawerOpen = false)}
+                    class="rounded-lg p-1.5 text-slate-400 hover:bg-white/10 hover:text-white"
+                    aria-label="Tutup menu"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="flex-1 overflow-y-auto space-y-1 px-3 py-4">
+                {#each nav as item (item.label)}
+                    {#if item.children}
+                        <div class="space-y-1">
+                            <button
+                                onclick={() => (expandedMenus[item.label] = !expandedMenus[item.label])}
+                                class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition {isChildActive(item) ? 'bg-white/15 text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}"
+                            >
+                                <div class="flex items-center gap-3">
+                                    <Icon name={item.icon} class="h-5 w-5 shrink-0" />
+                                    <span>{item.label}</span>
+                                </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 transition {expandedMenus[item.label] ? 'rotate-180' : ''}"><path d="m6 9 6 6 6-6"/></svg>
+                            </button>
+                            {#if expandedMenus[item.label]}
+                                <div class="ml-4 space-y-1 border-l border-white/10 pl-3">
+                                    {#each item.children as child (child.label)}
+                                        <Link
+                                            href={child.href}
+                                            onclick={() => (mobileDrawerOpen = false)}
+                                            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-primary-600 font-semibold text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}"
+                                        >
+                                            <span class="h-1.5 w-1.5 rounded-full {isActive(child.href) ? 'bg-white' : 'bg-slate-500'}"></span>
+                                            {child.label}
+                                        </Link>
+                                    {/each}
+                                </div>
+                            {/if}
+                        </div>
+                    {:else}
+                        <Link
+                            href={item.href}
+                            onclick={() => (mobileDrawerOpen = false)}
+                            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition {isActive(item.href) ? 'bg-primary-600 font-semibold text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}"
+                        >
+                            <Icon name={item.icon} class="h-5 w-5 shrink-0" />
+                            <span>{item.label}</span>
+                        </Link>
+                    {/if}
+                {/each}
+            </nav>
+
+            <div class="border-t border-white/10 p-3">
+                <button
+                    onclick={logout}
+                    class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium text-red-400 hover:bg-red-500/10"
+                >
+                    <Icon name="logout" class="h-4 w-4" />
+                    Logout
+                </button>
+            </div>
+        </aside>
+    {/if}
+
     <!-- Desktop sidebar: fixed, stays on scroll -->
-    <aside class="fixed inset-y-0 left-0 z-30 hidden h-screen flex-col bg-gradient-to-b from-primary-700 via-primary-800 to-primary-900 text-white transition-[width] duration-200 lg:flex {collapsed ? 'w-15' : 'w-56'}">
+    <aside class="fixed inset-y-0 left-0 z-30 hidden h-screen flex-col bg-gradient-to-b from-primary-700 via-primary-800 to-primary-900 text-white transition-[width] duration-200 lg:flex {collapsed ? 'w-16' : 'w-56'}">
         <div class="flex h-16 items-center justify-center">
             <button onclick={toggle} class="flex items-center gap-2.5 rounded-lg transition hover:bg-white/10 {collapsed ? 'p-1.5' : 'px-3 py-1.5'}" title={collapsed ? 'Perluas menu' : 'Lipat menu'}>
                 <Logo tone="light" size="md" showText={!collapsed} />
             </button>
         </div>
 
-        <nav class="sidebar-dropdown flex flex-1 flex-col overflow-y-auto {collapsed ? 'items-center justify-center gap-3.5 py-3' : 'justify-start space-y-3.5 px-3 pt-4 pb-2'} relative">
+        <nav class="sidebar-dropdown flex flex-1 flex-col overflow-y-auto {collapsed ? 'items-center justify-start space-y-3.5 py-4' : 'justify-start space-y-3.5 px-3 pt-4 pb-2'} relative">
             {#each nav as item (item.label)}
                 {#if item.children}
                     <!-- Parent with children -->
-                    <div class="relative">
+                    <div class="relative w-full flex justify-center">
                         <button
                             onclick={(e) => {
                                 e.stopPropagation();
@@ -237,28 +359,30 @@
                             {/if}
                         </button>
                         {#if !collapsed && expandedMenus[item.label]}
-                            <div class="ml-4 mt-1 space-y-0.5 border-l border-white/20 pl-3">
+                            <div class="ml-4 mt-1 space-y-0.5 border-l border-white/20 pl-3 w-full">
                                 {#each item.children as child (child.label)}
-                                    <a href={child.href} class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/60 hover:bg-white/10 hover:text-white'}">
-                                        <span class="h-1.5 w-1.5 rounded-full {isActive(child.href) ? 'bg-white' : 'bg-white/40'}"></span>
-                                        {child.label}
-                                    </a>
+                                    <Link href={child.href} class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/60 hover:bg-white/10 hover:text-white'}">
+                                        <Icon name={child.icon ?? 'box'} class="h-4 w-4 shrink-0 {isActive(child.href) ? 'text-white' : 'text-white/60'}" />
+                                        <span>{child.label}</span>
+                                    </Link>
                                 {/each}
                             </div>
                         {/if}
                     </div>
                 {:else}
                     <!-- Simple link -->
-                    <a
-                        href={item.href}
-                        title={collapsed ? item.label : undefined}
-                        class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {isActive(item.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
-                    >
-                        <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'}" />
-                        {#if !collapsed}
-                            <span class="flex-1 text-left text-sm">{item.label}</span>
-                        {/if}
-                    </a>
+                    <div class="w-full flex justify-center">
+                        <Link
+                            href={item.href}
+                            title={collapsed ? item.label : undefined}
+                            class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {isActive(item.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
+                        >
+                            <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'}" />
+                            {#if !collapsed}
+                                <span class="flex-1 text-left text-sm">{item.label}</span>
+                            {/if}
+                        </Link>
+                    </div>
                 {/if}
             {/each}
         </nav>
@@ -272,10 +396,10 @@
                     {/if}
                 </button>
                 {#if userMenuOpen}
-                    <div class="absolute bottom-full mb-2 overflow-hidden rounded-lg bg-white shadow-lg {collapsed ? 'left-0 w-40' : 'left-0 w-full'}">
-                        <button onclick={logout} class="flex w-full items-center gap-2.5 px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50">
-                            <Icon name="logout" class="h-4 w-4" />
-                            Logout
+                    <div class="absolute overflow-hidden rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-slate-900/10 border border-slate-100 z-50 {collapsed ? 'left-full ml-3 bottom-0 w-44' : 'bottom-full mb-2 left-0 w-full'}">
+                        <button onclick={logout} class="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-50">
+                            <Icon name="logout" class="h-4 w-4 text-red-500 shrink-0" />
+                            <span>Logout</span>
                         </button>
                     </div>
                 {/if}
@@ -286,20 +410,26 @@
         {#if collapsed && hoveredMenu}
             <div
                 style="position: fixed; top: {menuPosition.top}px; left: {menuPosition.left}px; z-index: 9999;"
-                class="portal-dropdown w-44 overflow-hidden rounded-lg bg-white shadow-lg"
+                class="portal-dropdown w-52 overflow-hidden rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-slate-900/10 border border-slate-100 text-slate-800"
             >
-                {#each hoveredMenu.children as child (child.label)}
-                    <a href={child.href} class="flex items-center gap-2 px-3 py-2.5 text-sm {isActive(child.href) ? 'bg-primary-50 font-semibold text-primary-700' : 'text-slate-600 hover:bg-slate-50'}">
-                        <span class="h-1.5 w-1.5 rounded-full flex-shrink-0 {isActive(child.href) ? 'bg-primary-600' : 'bg-slate-300'}"></span>
-                        {child.label}
-                    </a>
-                {/each}
+                <div class="space-y-0.5">
+                    {#each hoveredMenu.children as child (child.label)}
+                        <Link
+                            href={child.href}
+                            onclick={() => (hoveredMenu = null)}
+                            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-primary-600 font-semibold text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'}"
+                        >
+                            <Icon name={child.icon ?? 'box'} class="h-4 w-4 shrink-0 {isActive(child.href) ? 'text-white' : 'text-slate-400'}" />
+                            <span>{child.label}</span>
+                        </Link>
+                    {/each}
+                </div>
             </div>
         {/if}
     </aside>
 
     <!-- Main content -->
-    <div class="transition-[padding] duration-200 {collapsed ? 'lg:pl-15' : 'lg:pl-56'}">
+    <div class="transition-[padding] duration-200 {collapsed ? 'lg:pl-16' : 'lg:pl-56'}">
         <main class="mx-auto w-full max-w-[1600px] px-4 py-5 pb-24 lg:px-8 lg:py-8 lg:pb-8">
             {@render children?.()}
         </main>
@@ -307,13 +437,29 @@
 
     <!-- Mobile bottom nav -->
     <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white lg:hidden">
-        <div class="flex justify-around">
-            {#each nav as item (item.label)}
-                <a href={item.href} class="flex flex-col items-center gap-1 py-2.5 text-[10px] transition {isActive(item.href) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}">
+        <div class="flex justify-around items-center">
+            {#each mobileBottomItems as item (item.label)}
+                <Link
+                    href={getItemHref(item)}
+                    class="flex flex-col items-center gap-1 py-2 text-[10px] transition {isActive(getItemHref(item)) || isChildActive(item) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
+                >
                     <Icon name={item.icon} class="h-5 w-5" />
                     <span class="leading-none">{item.label}</span>
-                </a>
+                </Link>
             {/each}
+
+            {#if nav.length > 4}
+                <button
+                    onclick={() => (mobileDrawerOpen = true)}
+                    class="flex flex-col items-center gap-1 py-2 text-[10px] text-slate-500 hover:text-primary-700 transition"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                    </svg>
+                    <span class="leading-none">Lainnya</span>
+                </button>
+            {/if}
         </div>
     </nav>
 </div>
+

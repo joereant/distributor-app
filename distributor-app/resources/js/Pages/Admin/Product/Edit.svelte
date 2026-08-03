@@ -1,5 +1,5 @@
 <script>
-    import { router, usePage } from '@inertiajs/svelte';
+    import { Link, router, usePage } from '@inertiajs/svelte';
     import AppLayout from '../../../Layouts/AppLayout.svelte';
 
     const page = usePage();
@@ -42,10 +42,10 @@
 <AppLayout>
     <div class="mx-auto max-w-2xl">
         <header class="mb-6">
-            <a href="/admin/products" class="mb-2 inline-flex items-center gap-1.5 text-sm text-slate-500 transition hover:text-slate-700">
+            <Link href="/admin/products" class="mb-2 inline-flex items-center gap-1.5 text-sm text-slate-500 transition hover:text-slate-700">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><path d="m15 18-6-6 6-6"/></svg>
                 Kembali ke Produk
-            </a>
+            </Link>
             <h2 class="text-xl font-bold text-slate-800">Edit Produk</h2>
             <p class="mt-0.5 text-sm text-slate-500">Ubah detail produk.</p>
         </header>
@@ -149,7 +149,7 @@
             <div class="flex items-center justify-between gap-3">
                 <button type="button" onclick={deleteProduct} class="rounded-xl border border-red-200 bg-white px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50">Hapus Produk</button>
                 <div class="flex gap-3">
-                    <a href="/admin/products" class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Batal</a>
+                    <Link href="/admin/products" class="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50">Batal</Link>
                     <button type="submit" class="rounded-xl bg-primary-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-700">Simpan Perubahan</button>
                 </div>
             </div>
