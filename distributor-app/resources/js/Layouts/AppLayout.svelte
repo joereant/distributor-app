@@ -105,9 +105,40 @@
         <div class="flex items-center gap-2.5">
             <Logo size="sm" tone="dark" />
         </div>
-        <div class="flex items-center gap-3">
-            <span class="max-w-[140px] truncate text-sm text-slate-600">{user?.name}</span>
-            <button onclick={logout} class="text-sm font-medium text-red-600 hover:text-red-700">Logout</button>
+        <div class="relative">
+            <button
+                onclick={(e) => { e.stopPropagation(); topMenuOpen = !topMenuOpen; }}
+                class="flex items-center gap-2.5 rounded-lg p-1.5 transition hover:bg-slate-100"
+            >
+                {#if user?.avatar}
+                    <img
+                        src={user.avatar}
+                        alt={user?.name}
+                        class="h-8 w-8 rounded-full object-cover"
+                    />
+                {:else}
+                    <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-bold text-primary-700">
+                        {initials(user?.name)}
+                    </div>
+                {/if}
+                <span class="max-w-[120px] truncate text-sm font-medium text-slate-700">{user?.name}</span>
+                <Icon name="chevron" class="h-4 w-4 shrink-0 text-slate-400 transition {topMenuOpen ? 'rotate-180' : ''}" />
+            </button>
+            {#if topMenuOpen}
+                <div class="absolute right-0 top-full mt-1 w-48 overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-slate-200">
+                    <div class="border-b border-slate-100 px-3 py-2.5">
+                        <p class="truncate text-sm font-medium text-slate-800">{user?.name}</p>
+                        <p class="truncate text-xs text-slate-500">{user?.email}</p>
+                    </div>
+                    <button
+                        onclick={logout}
+                        class="flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm font-medium text-red-600 transition hover:bg-red-50"
+                    >
+                        <Icon name="logout" class="h-4 w-4" />
+                        Logout
+                    </button>
+                </div>
+            {/if}
         </div>
     </header>
 
