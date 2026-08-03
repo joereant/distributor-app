@@ -171,7 +171,6 @@
                     <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white">{initials(user?.name)}</div>
                     {#if !collapsed}
                         <span class="min-w-0 flex-1 truncate text-left text-sm font-medium">{user?.name}</span>
-                        <Icon name="chevron" class="h-4 w-4 shrink-0 text-white/50 transition {userMenuOpen ? 'rotate-180' : ''}" />
                     {/if}
                 </button>
                 {#if userMenuOpen}
