@@ -121,6 +121,9 @@
                         {initials(user?.name)}
                     </div>
                 {/if}
+                <!-- Nama + chevron: tablet+ only -->
+                <span class="ml-2 hidden max-w-[120px] truncate text-sm font-medium text-slate-700 md:block lg:hidden">{user?.name}</span>
+                <Icon name="chevron" class="hidden h-4 w-4 shrink-0 text-slate-400 transition md:block lg:hidden {topMenuOpen ? 'rotate-180' : ''}" />
             </button>
             {#if topMenuOpen}
                 <div class="absolute right-0 top-full mt-1 w-48 overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-slate-200">
