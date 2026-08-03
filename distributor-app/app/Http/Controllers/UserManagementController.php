@@ -30,9 +30,17 @@ class UserManagementController extends Controller
         $users = $query->orderBy('created_at', 'desc')->paginate(20);
         $areas = Area::orderBy('name')->get();
 
+        $stats = [
+            'total' => User::count(),
+            'active' => User::where('status', 'active')->count(),
+            'pending' => User::where('status', 'pending')->count(),
+            'sales' => User::where('role', 'sales')->count(),
+        ];
+
         return inertia('Admin/UserManagement/Index', [
             'users' => $users,
             'areas' => $areas,
+            'stats' => $stats,
             'filters' => [
                 'search' => $search ?? '',
                 'role' => $role ?? '',
@@ -82,6 +90,42 @@ class UserManagementController extends Controller
         $user->update($validated);
 
         return redirect('/admin/users-manage')->with('success', 'User berhasil diperbarui.');
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $validated = $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+            'action' => 'required|in:activate,deactivate,change_role',
+            'role' => 'nullable|in:owner,admin,sales,customer',
+        ]);
+
+        $ids = array_diff($validated['ids'], [auth()->id()]);
+
+        if (empty($ids)) {
+            return redirect('/admin/users-manage')->with('success', 'Tidak ada akun yang diubah.');
+        }
+
+        if ($validated['action'] === 'activate') {
+            User::whereIn('id', $ids)->update([
+                'status' => 'active',
+                'verified_at' => now(),
+            ]);
+            $msg = count($ids) . ' user berhasil diaktifkan.';
+        } elseif ($validated['action'] === 'deactivate') {
+            User::whereIn('id', $ids)->update([
+                'status' => 'rejected',
+            ]);
+            $msg = count($ids) . ' user berhasil dinonaktifkan.';
+        } elseif ($validated['action'] === 'change_role' && !empty($validated['role'])) {
+            User::whereIn('id', $ids)->update([
+                'role' => $validated['role'],
+            ]);
+            $msg = 'Role ' . count($ids) . ' user berhasil diubah ke ' . ucfirst($validated['role']) . '.';
+        }
+
+        return redirect('/admin/users-manage')->with('success', $msg ?? 'Aksi masal berhasil.');
     }
 
     public function destroy(User $user)

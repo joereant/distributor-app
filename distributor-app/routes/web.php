@@ -42,6 +42,7 @@ Route::middleware('auth')->group(function () {
         // User Management
         Route::get('/admin/users-manage', [UserManagementController::class, 'index']);
         Route::post('/admin/users-manage', [UserManagementController::class, 'store']);
+        Route::post('/admin/users-manage/bulk-action', [UserManagementController::class, 'bulkAction']);
         Route::put('/admin/users-manage/{user}', [UserManagementController::class, 'update']);
         Route::delete('/admin/users-manage/{user}', [UserManagementController::class, 'destroy']);
 
