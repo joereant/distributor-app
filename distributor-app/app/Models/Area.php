@@ -13,4 +13,9 @@ class Area extends Model
     {
         return $this->hasMany(User::class, 'sales_area_id');
     }
+
+    public function productPrices(): HasMany
+    {
+        return $this->hasMany(ProductPrice::class);
+    }
 }

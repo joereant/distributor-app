@@ -89,8 +89,7 @@ class ProductController extends Controller
             ->sortBy(fn ($_, $k) => $k);
 
         // Price matrix: product_id × area_id → price
-        $prices = ProductPrice::when($selectedPlant, fn ($q) => $q->where('plant_id', $selectedPlant->id))
-            ->get()
+        $prices = ProductPrice::get()
             ->keyBy(fn ($p) => "{$p->product_id}_{$p->area_id}");
 
         return inertia('Admin/Product/Index', [
@@ -201,7 +200,7 @@ class ProductController extends Controller
 
                 ProductPrice::updateOrCreate(
                     ['product_id' => $productId, 'area_id' => $areaId],
-                    ['plant_id' => $plantId, 'price' => $price]
+                    ['price' => $price]
                 );
             }
         }

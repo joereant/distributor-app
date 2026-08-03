@@ -35,8 +35,9 @@ class ReportController extends Controller
 
         $transactions = $query->paginate(30)->withQueryString();
 
-        // Stats summary
+        // Stats summary — clone & reset order to avoid PostgreSQL grouping error
         $stats = (clone $query)
+            ->reorder()
             ->selectRaw('
                 COUNT(*) as total_orders,
                 SUM(total) as total_sales,

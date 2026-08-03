@@ -25,7 +25,7 @@ class AreaController extends Controller
 
         Area::create($validated);
 
-        return redirect('/admin/areas')->with('success', 'Area berhasil ditambahkan.');
+        return redirect('/admin/areas')->with('message', 'Area berhasil ditambahkan.');
     }
 
     public function update(Request $request, Area $area)
@@ -38,13 +38,13 @@ class AreaController extends Controller
 
         $area->update($validated);
 
-        return redirect('/admin/areas')->with('success', 'Area berhasil diperbarui.');
+        return redirect('/admin/areas')->with('message', 'Area berhasil diperbarui.');
     }
 
     public function destroy(Area $area)
     {
         $area->delete();
 
-        return redirect('/admin/areas')->with('success', 'Area berhasil dihapus.');
+        return redirect('/admin/areas')->with('message', 'Area berhasil dihapus.');
     }
 }
