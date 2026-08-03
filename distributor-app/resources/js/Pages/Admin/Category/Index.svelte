@@ -219,30 +219,36 @@
                     <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-teal-500 to-emerald-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100"></div>
 
                     <div>
-                        <!-- Header: Icon, Name & Status Dot -->
-                        <div class="flex items-start justify-between gap-2.5">
-                            <div class="flex items-center gap-3 min-w-0 flex-1">
-                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-teal-100/70 text-teal-700 ring-1 ring-teal-200/60 transition-all duration-200 group-hover:from-teal-600 group-hover:to-emerald-600 group-hover:text-white group-hover:shadow-xs">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-                                </div>
-                                <div class="min-w-0 flex-1">
-                                    <h3 class="truncate text-sm font-bold tracking-tight text-slate-900 transition-colors group-hover:text-teal-700" title={cat.name}>
-                                        {cat.name}
-                                    </h3>
-                                    <p class="mt-0.5 truncate font-mono text-[11px] text-slate-400">
-                                        #{cat.slug ?? cat.name.toLowerCase().replace(/\s+/g, '-')}
-                                    </p>
-                                </div>
+                        <!-- Header: Icon & Category Name -->
+                        <div class="flex items-center gap-3">
+                            <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-50 to-teal-100/70 text-teal-700 ring-1 ring-teal-200/60 transition-all duration-200 group-hover:from-teal-600 group-hover:to-emerald-600 group-hover:text-white group-hover:shadow-xs">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-5 w-5"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h3 class="truncate text-sm font-bold tracking-tight text-slate-900 transition-colors group-hover:text-teal-700" title={cat.name}>
+                                    {cat.name}
+                                </h3>
+                                <p class="mt-0.5 truncate font-mono text-[11px] text-slate-400">
+                                    #{cat.slug ?? cat.name.toLowerCase().replace(/\s+/g, '-')}
+                                </p>
                             </div>
                         </div>
 
-                        <!-- Mid Status & Product Counter Pill -->
+                        <!-- Mid Section: Interactive Toggle Pill Switch + Product Counter -->
                         <div class="mt-4 flex items-center justify-between gap-2">
-                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 {cat.is_active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-500 ring-slate-200'}">
+                            <!-- Unified Toggle Switch Pill -->
+                            <button
+                                type="button"
+                                onclick={(e) => toggleActive(e, cat)}
+                                title={cat.is_active ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan'}
+                                class="inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-2xs transition-all hover:scale-105 active:scale-95 ring-1 {cat.is_active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/30 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 ring-slate-300 hover:bg-slate-200'}"
+                            >
                                 <span class="h-1.5 w-1.5 rounded-full {cat.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
                                 {cat.is_active ? 'Aktif' : 'Nonaktif'}
-                            </span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3 w-3 opacity-60"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                            </button>
 
+                            <!-- Product Count Badge -->
                             <div class="flex items-center gap-1 rounded-lg bg-slate-100/80 px-2.5 py-1 text-xs font-semibold text-slate-700 group-hover:bg-teal-50 group-hover:text-teal-800 transition-colors">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 opacity-70"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
                                 <span>{cat.products_count ?? 0}</span>
@@ -250,21 +256,13 @@
                         </div>
                     </div>
 
-                    <!-- Footer Action Bar -->
+                    <!-- Footer: Quick Action Hint -->
                     <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
                         <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 transition-colors group-hover:text-teal-600">
                             Edit Detail
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3 w-3 transition-transform group-hover:translate-x-0.5"><path d="m9 18 6-6-6-6"/></svg>
                         </span>
-
-                        <button
-                            type="button"
-                            onclick={(e) => toggleActive(e, cat)}
-                            class="rounded-lg border border-slate-200/80 bg-white px-2.5 py-1 text-[11px] font-semibold shadow-2xs transition hover:bg-slate-50 {cat.is_active ? 'text-amber-700 hover:border-amber-300' : 'text-emerald-700 hover:border-emerald-300'}"
-                            title={cat.is_active ? 'Sembunyikan dari katalog' : 'Tampilkan di katalog'}
-                        >
-                            {cat.is_active ? 'Nonaktifkan' : 'Aktifkan'}
-                        </button>
+                        <span class="text-[10px] font-mono text-slate-300">ID #{cat.id}</span>
                     </div>
                 </div>
             {/each}
