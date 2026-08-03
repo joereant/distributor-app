@@ -79,17 +79,38 @@
         if (totalCellsCount === 0) return 0;
         return ((filledCellsCount() / totalCellsCount) * 100).toFixed(0);
     });
+
+    let showFlash = $state(true);
+
+    $effect(() => {
+        if (flash) {
+            showFlash = true;
+            const timer = setTimeout(() => {
+                showFlash = false;
+            }, 3500);
+            return () => clearTimeout(timer);
+        }
+    });
 </script>
 
 <AppLayout>
     <div class="space-y-6">
         <!-- Flash Message -->
-        {#if flash}
-            <div class="flex items-center gap-3 rounded-2xl bg-emerald-50/90 p-4 text-sm font-medium text-emerald-800 shadow-xs ring-1 ring-emerald-200/60 backdrop-blur-xs">
-                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-xs">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-4 w-4"><path d="M20 6 9 17l-5-5"/></svg>
-                </span>
-                <p class="flex-1">{flash}</p>
+        {#if flash && showFlash}
+            <div class="flex items-center justify-between gap-3 rounded-2xl bg-emerald-50/95 p-4 text-sm font-medium text-emerald-800 shadow-md ring-1 ring-emerald-200/80 backdrop-blur-xs transition-all duration-300 animate-in fade-in slide-in-from-top-2">
+                <div class="flex items-center gap-3">
+                    <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-4 w-4"><path d="M20 6 9 17l-5-5"/></svg>
+                    </span>
+                    <p class="flex-1">{flash}</p>
+                </div>
+                <button
+                    onclick={() => showFlash = false}
+                    class="rounded-lg p-1 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-900 transition-colors"
+                    title="Tutup notifikasi"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
             </div>
         {/if}
 
