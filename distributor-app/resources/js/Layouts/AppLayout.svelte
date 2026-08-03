@@ -142,6 +142,12 @@
     // Items to show in mobile bottom nav bar (max 4 + 1 "Menu" button)
     const mobileBottomItems = $derived(nav.slice(0, 4));
 
+    const isLainnyaActive = $derived(
+        nav.slice(4).some(item =>
+            item.href ? isActive(item.href) : (item.children && item.children.some(c => isActive(c.href)))
+        )
+    );
+
     function getItemHref(item) {
         if (item.href) return item.href;
         if (item.children && item.children.length > 0) return item.children[0].href;
@@ -458,17 +464,17 @@
             {@render children?.()}
         </main>
     </div>    <!-- Mobile bottom nav -->
-    <nav class="fixed inset-x-0 bottom-0 z-30 w-full max-w-full overflow-hidden border-t border-slate-200/80 bg-white/95 backdrop-blur-md pb-[env(safe-area-inset-bottom,0px)] lg:hidden shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
-        <div class="grid {nav.length > 4 ? 'grid-cols-4 sm:grid-cols-5' : mobileBottomItems.length === 3 ? 'grid-cols-3' : 'grid-cols-4'} items-center w-full max-w-full overflow-hidden px-1">
+    <nav class="fixed inset-x-0 bottom-0 z-30 w-full max-w-full border-t border-slate-200/80 bg-white/95 backdrop-blur-md pb-[env(safe-area-inset-bottom,0px)] lg:hidden shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+        <div class="grid {nav.length > 4 ? 'grid-cols-4 sm:grid-cols-5' : mobileBottomItems.length === 3 ? 'grid-cols-3' : 'grid-cols-4'} items-center w-full max-w-full px-1">
             {#each mobileBottomItems as item, idx (item.label)}
                 {#if item.children}
-                    <div class="relative {idx === 3 && nav.length > 4 ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center bottom-nav-popover w-full min-w-0 max-w-full overflow-hidden">
+                    <div class="relative {idx === 3 && nav.length > 4 ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center bottom-nav-popover w-full min-w-0 max-w-full">
                         <button
                             onclick={(e) => {
                                 e.stopPropagation();
                                 activeBottomPopover = activeBottomPopover === item.label ? null : item.label;
                             }}
-                            class="flex flex-col items-center justify-center gap-1 py-2 px-0.5 text-[10px] w-full min-w-0 max-w-full overflow-hidden transition {isActive(getItemHref(item)) || isChildActive(item) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
+                            class="flex flex-col items-center justify-center gap-1 py-2 px-0.5 text-[10px] w-full min-w-0 max-w-full transition {isActive(getItemHref(item)) || isChildActive(item) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
                         >
                             <Icon name={item.icon} class="h-5 w-5 shrink-0" />
                             <span class="leading-tight truncate w-full max-w-full text-center px-0.5">{item.label}</span>
@@ -494,7 +500,7 @@
                 {:else}
                     <Link
                         href={item.href}
-                        class="{idx === 3 && nav.length > 4 ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center gap-1 py-2 px-0.5 text-[10px] w-full min-w-0 max-w-full overflow-hidden transition {isActive(item.href) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
+                        class="{idx === 3 && nav.length > 4 ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center gap-1 py-2 px-0.5 text-[10px] w-full min-w-0 max-w-full transition {isActive(item.href) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
                     >
                         <Icon name={item.icon} class="h-5 w-5 shrink-0" />
                         <span class="leading-tight truncate w-full max-w-full text-center px-0.5">{item.label}</span>
@@ -503,17 +509,55 @@
             {/each}
 
             {#if nav.length > 4}
-                <button
-                    onclick={() => (mobileDrawerOpen = true)}
-                    class="flex flex-col items-center justify-center gap-1 py-2 px-0.5 text-[10px] w-full min-w-0 max-w-full overflow-hidden text-slate-500 hover:text-primary-700 transition"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5 shrink-0">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25-2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
-                    </svg>
-                    <span class="leading-tight truncate w-full max-w-full text-center px-0.5">Lainnya</span>
-                </button>
+                <div class="relative flex flex-col items-center justify-center bottom-nav-popover w-full min-w-0 max-w-full">
+                    <button
+                        onclick={(e) => {
+                            e.stopPropagation();
+                            activeBottomPopover = activeBottomPopover === 'Lainnya' ? null : 'Lainnya';
+                        }}
+                        class="flex flex-col items-center justify-center gap-1 py-2 px-0.5 text-[10px] w-full min-w-0 max-w-full transition {activeBottomPopover === 'Lainnya' || isLainnyaActive ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5 shrink-0">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25-2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                        </svg>
+                        <span class="leading-tight truncate w-full max-w-full text-center px-0.5">Lainnya</span>
+                    </button>
+
+                    {#if activeBottomPopover === 'Lainnya'}
+                        <div class="absolute bottom-full right-0 mb-3 w-48 max-w-[calc(100vw-32px)] overflow-hidden rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-slate-900/10 border border-slate-100 z-50">
+                            <div class="space-y-0.5">
+                                {#each nav.slice(4) as item, i (item.label)}
+                                    {#if item.children}
+                                        <div class="{i === 0 ? 'block sm:hidden' : ''}">
+                                            <div class="px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{item.label}</div>
+                                            {#each item.children as child (child.label)}
+                                                <Link
+                                                    href={child.href}
+                                                    onclick={() => (activeBottomPopover = null)}
+                                                    class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition {isActive(child.href) ? 'bg-primary-700 font-semibold text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 font-medium'}"
+                                                >
+                                                    <Icon name={child.icon ?? 'box'} class="h-4 w-4 shrink-0 {isActive(child.href) ? 'text-white' : 'text-slate-400'}" />
+                                                    <span>{child.label}</span>
+                                                </Link>
+                                            {/each}
+                                        </div>
+                                    {:else}
+                                        <Link
+                                            href={item.href}
+                                            onclick={() => (activeBottomPopover = null)}
+                                            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition {i === 0 ? 'flex sm:hidden' : ''} {isActive(item.href) ? 'bg-primary-700 font-semibold text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 font-medium'}"
+                                        >
+                                            <Icon name={item.icon} class="h-4 w-4 shrink-0 {isActive(item.href) ? 'text-white' : 'text-slate-400'}" />
+                                            <span>{item.label}</span>
+                                        </Link>
+                                    {/if}
+                                {/each}
+                            </div>
+                        </div>
+                    {/if}
+                </div>
             {/if}
         </div>
-    </nav>nav>
+    </nav>
 </div>
 
