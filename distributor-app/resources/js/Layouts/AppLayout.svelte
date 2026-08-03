@@ -64,6 +64,7 @@
             { label: 'Ongkir', href: '/admin/shipping-rates', icon: 'truck' },
             { label: 'Customer', href: '/admin/customers', icon: 'building' },
             { label: 'User', href: '/admin/users-manage', icon: 'users' },
+            { label: 'Laporan', href: '/admin/reports', icon: 'chart' },
         ],
         admin: [
             { label: 'Dashboard', href: '/admin', icon: 'home' },
@@ -74,6 +75,7 @@
             { label: 'Ongkir', href: '/admin/shipping-rates', icon: 'truck' },
             { label: 'Customer', href: '/admin/customers', icon: 'building' },
             { label: 'User', href: '/admin/users-manage', icon: 'users' },
+            { label: 'Laporan', href: '/admin/reports', icon: 'chart' },
         ],
         sales: [
             { label: 'Dashboard', href: '/sales', icon: 'home' },

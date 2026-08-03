@@ -8,6 +8,7 @@ use App\Http\Controllers\ShippingRateController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReferalController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserController;
@@ -78,6 +79,10 @@ Route::middleware('auth')->group(function () {
         Route::post('/admin/shipping-rates', [ShippingRateController::class, 'store']);
         Route::put('/admin/shipping-rates/{shippingRate}', [ShippingRateController::class, 'update']);
         Route::delete('/admin/shipping-rates/{shippingRate}', [ShippingRateController::class, 'destroy']);
+
+        // Reports
+        Route::get('/admin/reports', [ReportController::class, 'index']);
+        Route::get('/admin/reports/export', [ReportController::class, 'exportCsv']);
     });
     Route::middleware('role:sales')->get('/sales', [DashboardController::class, 'sales']);
 
