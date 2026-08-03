@@ -234,35 +234,38 @@
                             </div>
                         </div>
 
-                        <!-- Mid Section: Interactive Toggle Pill Switch + Product Counter -->
+                        <!-- Mid Section: Status Badge + Interactive Toggle Switch -->
                         <div class="mt-4 flex items-center justify-between gap-2">
-                            <!-- Unified Toggle Switch Pill -->
+                            <!-- Status Badge -->
+                            <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 {cat.is_active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/20' : 'bg-slate-100 text-slate-500 ring-slate-200'}">
+                                <span class="h-1.5 w-1.5 rounded-full {cat.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
+                                {cat.is_active ? 'Aktif' : 'Nonaktif'}
+                            </span>
+
+                            <!-- Sleek Interactive Switch Toggle -->
                             <button
                                 type="button"
                                 onclick={(e) => toggleActive(e, cat)}
                                 title={cat.is_active ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan'}
-                                class="inline-flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold shadow-2xs transition-all hover:scale-105 active:scale-95 ring-1 {cat.is_active ? 'bg-emerald-50 text-emerald-700 ring-emerald-600/30 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 ring-slate-300 hover:bg-slate-200'}"
+                                class="relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {cat.is_active ? 'bg-teal-600' : 'bg-slate-300'}"
                             >
-                                <span class="h-1.5 w-1.5 rounded-full {cat.is_active ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}"></span>
-                                {cat.is_active ? 'Aktif' : 'Nonaktif'}
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3 w-3 opacity-60"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
+                                <span class="sr-only">Toggle Status</span>
+                                <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out {cat.is_active ? 'translate-x-4' : 'translate-x-0'}"></span>
                             </button>
-
-                            <!-- Product Count Badge -->
-                            <div class="flex items-center gap-1 rounded-lg bg-slate-100/80 px-2.5 py-1 text-xs font-semibold text-slate-700 group-hover:bg-teal-50 group-hover:text-teal-800 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 opacity-70"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
-                                <span>{cat.products_count ?? 0}</span>
-                            </div>
                         </div>
                     </div>
 
-                    <!-- Footer: Quick Action Hint -->
+                    <!-- Footer: Quick Action Hint & Product Count -->
                     <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3">
                         <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 transition-colors group-hover:text-teal-600">
                             Edit Detail
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="h-3 w-3 transition-transform group-hover:translate-x-0.5"><path d="m9 18 6-6-6-6"/></svg>
                         </span>
-                        <span class="text-[10px] font-mono text-slate-300">ID #{cat.id}</span>
+
+                        <div class="flex items-center gap-1 rounded-lg bg-slate-100/80 px-2 py-0.5 text-xs font-semibold text-slate-700 group-hover:bg-teal-50 group-hover:text-teal-800 transition-colors" title="Jumlah produk terikat">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5 opacity-70"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/></svg>
+                            <span>{cat.products_count ?? 0}</span>
+                        </div>
                     </div>
                 </div>
             {/each}
