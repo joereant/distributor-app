@@ -15,21 +15,6 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $tab = $request->get('tab', 'products');
-
-        if ($tab === 'prices') {
-            return $this->pricesTab($request);
-        }
-
-        if ($tab === 'categories') {
-            return $this->categoriesTab($request);
-        }
-
-        return $this->productsTab($request);
-    }
-
-    private function productsTab(Request $request)
-    {
         $products = Product::with('category')
             ->when($request->search, fn ($q) => $q->where('name', 'like', "%{$request->search}%")
                 ->orWhere('code', 'like', "%{$request->search}%"))
@@ -45,26 +30,10 @@ class ProductController extends Controller
             'products' => $products,
             'categories' => $categories,
             'filters' => $request->only(['search', 'category', 'active']),
-            'tab' => 'products',
         ]);
     }
 
-    private function categoriesTab(Request $request)
-    {
-        $categories = Category::withCount('products')
-            ->when($request->search, fn ($q) => $q->where('name', 'like', "%{$request->search}%"))
-            ->orderBy('name')
-            ->paginate(20)
-            ->withQueryString();
-
-        return inertia('Admin/Product/Index', [
-            'tab' => 'categories',
-            'categories' => $categories,
-            'filters' => $request->only(['search']),
-        ]);
-    }
-
-    private function pricesTab(Request $request)
+    public function prices(Request $request)
     {
         $plantId = $request->get('plant');
 
@@ -92,8 +61,7 @@ class ProductController extends Controller
         $prices = ProductPrice::get()
             ->keyBy(fn ($p) => "{$p->product_id}_{$p->area_id}");
 
-        return inertia('Admin/Product/Index', [
-            'tab' => 'prices',
+        return inertia('Admin/Product/Price', [
             'plants' => $plants,
             'selected_plant' => $selectedPlant,
             'areas' => $areas,

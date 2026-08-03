@@ -12,10 +12,10 @@
 
     let mobileDrawerOpen = $state(false);
 
-    // Sidebar auto-collapse: expand ≥ 1536 (2xl), collapse < 1536
+    // Sidebar auto-collapse: expand ≥ 1280 (xl), collapse < 1280
     // Manual toggle → stored in localStorage, overrides breakpoint default
     function getBreakpointDefault() {
-        return window.innerWidth < 1536;
+        return window.innerWidth < 1280;
     }
 
     let userToggled = $state(localStorage.getItem('sentrax_sidebar_toggled') === 'true');
@@ -39,6 +39,7 @@
     let topMenuOpen = $state(false);
     let expandedMenus = $state({});
     let hoveredMenu = $state(null);
+    let activeBottomPopover = $state(null);
     let menuPosition = $state({ top: 0, left: 0 });
 
     // Auto-expand menu if child is active
@@ -83,6 +84,18 @@
         return () => document.removeEventListener('click', handleClick);
     });
 
+    // Close bottom nav popover on click outside
+    $effect(() => {
+        if (activeBottomPopover === null) return;
+        function handleClick(e) {
+            if (!e.target.closest('.bottom-nav-popover')) {
+                activeBottomPopover = null;
+            }
+        }
+        document.addEventListener('click', handleClick);
+        return () => document.removeEventListener('click', handleClick);
+    });
+
     const navByRole = {
         owner: [
             { label: 'Dashboard', href: '/owner', icon: 'home' },
@@ -90,7 +103,7 @@
             { label: 'Produk', icon: 'box', children: [
                 { label: 'Daftar Produk', href: '/admin/products', icon: 'box' },
                 { label: 'Kategori', href: '/admin/products/categories', icon: 'category' },
-                { label: 'Daftar Harga', href: '/admin/products?tab=prices', icon: 'tag' },
+                { label: 'Daftar Harga', href: '/admin/products/prices', icon: 'tag' },
             ]},
             { label: 'Area', href: '/admin/areas', icon: 'map' },
             { label: 'Pabrik', href: '/admin/plants', icon: 'factory' },
@@ -105,7 +118,7 @@
             { label: 'Produk', icon: 'box', children: [
                 { label: 'Daftar Produk', href: '/admin/products', icon: 'box' },
                 { label: 'Kategori', href: '/admin/products/categories', icon: 'category' },
-                { label: 'Daftar Harga', href: '/admin/products?tab=prices', icon: 'tag' },
+                { label: 'Daftar Harga', href: '/admin/products/prices', icon: 'tag' },
             ]},
             { label: 'Area', href: '/admin/areas', icon: 'map' },
             { label: 'Pabrik', href: '/admin/plants', icon: 'factory' },
@@ -142,6 +155,19 @@
         localStorage.setItem('sentrax_sidebar_collapsed', String(collapsed));
     }
 
+    function getAllNavHrefs() {
+        const hrefs = [];
+        for (const item of nav) {
+            if (item.href) hrefs.push(item.href.split('?')[0]);
+            if (item.children) {
+                for (const child of item.children) {
+                    if (child.href) hrefs.push(child.href.split('?')[0]);
+                }
+            }
+        }
+        return hrefs;
+    }
+
     function isActive(href) {
         if (!href) return false;
         const [currentPath, currentQuery] = (currentUrl || '').split('?');
@@ -170,10 +196,17 @@
 
         // 5. Nested child route match (e.g. /admin/products/create)
         if (currentPath.startsWith(targetPath + '/')) {
-            // Prevent /admin/products from matching sibling route /admin/products/categories
-            if (targetPath === '/admin/products' && currentPath.startsWith('/admin/products/categories')) {
+            const allHrefs = getAllNavHrefs();
+            const hasBetterMatch = allHrefs.some(otherHref =>
+                otherHref !== targetPath &&
+                otherHref.length > targetPath.length &&
+                (currentPath === otherHref || currentPath.startsWith(otherHref + '/'))
+            );
+
+            if (hasBetterMatch) {
                 return false;
             }
+
             return true;
         }
 
@@ -200,15 +233,6 @@
     <!-- Mobile top bar -->
     <header class="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
         <div class="flex items-center gap-3">
-            <button
-                onclick={() => (mobileDrawerOpen = !mobileDrawerOpen)}
-                class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100"
-                aria-label="Toggle menu"
-            >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
-            </button>
             <Logo size="sm" tone="dark" />
         </div>
         <div class="relative">
@@ -272,27 +296,27 @@
             <nav class="flex-1 overflow-y-auto space-y-1 px-3 py-4">
                 {#each nav as item (item.label)}
                     {#if item.children}
-                        <div class="space-y-1">
+                        <div class="space-y-1 transition-all duration-200 {expandedMenus[item.label] || isChildActive(item) ? 'bg-white rounded-xl p-1 shadow-md text-slate-800' : ''}">
                             <button
                                 onclick={() => (expandedMenus[item.label] = !expandedMenus[item.label])}
-                                class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition {isChildActive(item) ? 'bg-white/15 text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}"
+                                class="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium transition {expandedMenus[item.label] || isChildActive(item) ? 'text-slate-800 font-semibold hover:bg-slate-100' : 'text-slate-300 hover:bg-white/10 hover:text-white'}"
                             >
                                 <div class="flex items-center gap-3">
-                                    <Icon name={item.icon} class="h-5 w-5 shrink-0" />
+                                    <Icon name={item.icon} class="h-5 w-5 shrink-0 {expandedMenus[item.label] || isChildActive(item) ? 'text-primary-700' : ''}" />
                                     <span>{item.label}</span>
                                 </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 transition {expandedMenus[item.label] ? 'rotate-180' : ''}"><path d="m6 9 6 6 6-6"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 transition {expandedMenus[item.label] ? 'rotate-180' : ''} {expandedMenus[item.label] || isChildActive(item) ? 'text-slate-500' : ''}"><path d="m6 9 6 6 6-6"/></svg>
                             </button>
                             {#if expandedMenus[item.label]}
-                                <div class="ml-4 space-y-1 border-l border-white/10 pl-3">
+                                <div class="mt-1 space-y-0.5 w-full">
                                     {#each item.children as child (child.label)}
                                         <Link
                                             href={child.href}
                                             onclick={() => (mobileDrawerOpen = false)}
-                                            class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-primary-600 font-semibold text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'}"
+                                            class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-primary-600 font-semibold text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 font-medium'}"
                                         >
-                                            <span class="h-1.5 w-1.5 rounded-full {isActive(child.href) ? 'bg-white' : 'bg-slate-500'}"></span>
-                                            {child.label}
+                                            <Icon name={child.icon ?? 'box'} class="h-4 w-4 shrink-0 {isActive(child.href) ? 'text-white' : 'text-slate-400'}" />
+                                            <span>{child.label}</span>
                                         </Link>
                                     {/each}
                                 </div>
@@ -302,9 +326,9 @@
                         <Link
                             href={item.href}
                             onclick={() => (mobileDrawerOpen = false)}
-                            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition {isActive(item.href) ? 'bg-primary-600 font-semibold text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'}"
+                            class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition {isActive(item.href) ? 'bg-white font-semibold text-primary-700 shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'}"
                         >
-                            <Icon name={item.icon} class="h-5 w-5 shrink-0" />
+                            <Icon name={item.icon} class="h-5 w-5 shrink-0 {isActive(item.href) ? 'text-primary-700' : ''}" />
                             <span>{item.label}</span>
                         </Link>
                     {/if}
@@ -335,7 +359,7 @@
             {#each nav as item (item.label)}
                 {#if item.children}
                     <!-- Parent with children -->
-                    <div class="relative w-full flex justify-center">
+                    <div class="relative w-full flex flex-col transition-all duration-200 {collapsed ? 'items-center' : (!collapsed && (expandedMenus[item.label] || isChildActive(item)) ? 'bg-white rounded-xl p-1 shadow-md text-slate-800' : '')}">
                         <button
                             onclick={(e) => {
                                 e.stopPropagation();
@@ -343,26 +367,26 @@
                                     hoveredMenu = hoveredMenu === item ? null : item;
                                     if (hoveredMenu) {
                                         const rect = e.currentTarget.getBoundingClientRect();
-                                        menuPosition = { top: rect.top, left: rect.right + 4 };
+                                        menuPosition = { top: rect.top, left: rect.right + 8 };
                                     }
                                 } else {
                                     expandedMenus[item.label] = !expandedMenus[item.label];
                                 }
                             }}
                             title={item.label}
-                            class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {isChildActive(item) || hoveredMenu === item || (!collapsed && expandedMenus[item.label]) ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
+                            class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {collapsed && isChildActive(item) ? 'bg-white font-semibold text-primary-700 shadow-sm' : (!collapsed && (expandedMenus[item.label] || isChildActive(item))) ? 'text-slate-800 font-semibold hover:bg-slate-100' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
                         >
-                            <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'}" />
+                            <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'} {(!collapsed && (expandedMenus[item.label] || isChildActive(item))) || (collapsed && isChildActive(item)) ? 'text-primary-700' : ''}" />
                             {#if !collapsed}
                                 <span class="flex-1 text-left text-sm">{item.label}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 transition {!collapsed && expandedMenus[item.label] ? 'rotate-180' : ''}"><path d="m6 9 6 6 6-6"/></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 transition {!collapsed && expandedMenus[item.label] ? 'rotate-180' : ''} {expandedMenus[item.label] || isChildActive(item) ? 'text-slate-500' : ''}"><path d="m6 9 6 6 6-6"/></svg>
                             {/if}
                         </button>
                         {#if !collapsed && expandedMenus[item.label]}
-                            <div class="ml-4 mt-1 space-y-0.5 border-l border-white/20 pl-3 w-full">
+                            <div class="mt-1 space-y-0.5 w-full">
                                 {#each item.children as child (child.label)}
-                                    <Link href={child.href} class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/60 hover:bg-white/10 hover:text-white'}">
-                                        <Icon name={child.icon ?? 'box'} class="h-4 w-4 shrink-0 {isActive(child.href) ? 'text-white' : 'text-white/60'}" />
+                                    <Link href={child.href} class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-primary-600 font-semibold text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 font-medium'}">
+                                        <Icon name={child.icon ?? 'box'} class="h-4 w-4 shrink-0 {isActive(child.href) ? 'text-white' : 'text-slate-400'}" />
                                         <span>{child.label}</span>
                                     </Link>
                                 {/each}
@@ -375,9 +399,9 @@
                         <Link
                             href={item.href}
                             title={collapsed ? item.label : undefined}
-                            class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {isActive(item.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
+                            class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {isActive(item.href) ? 'bg-white font-semibold text-primary-700 shadow-sm' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
                         >
-                            <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'}" />
+                            <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'} {isActive(item.href) ? 'text-primary-700' : ''}" />
                             {#if !collapsed}
                                 <span class="flex-1 text-left text-sm">{item.label}</span>
                             {/if}
@@ -410,14 +434,14 @@
         {#if collapsed && hoveredMenu}
             <div
                 style="position: fixed; top: {menuPosition.top}px; left: {menuPosition.left}px; z-index: 9999;"
-                class="portal-dropdown w-52 overflow-hidden rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-slate-900/10 border border-slate-100 text-slate-800"
+                class="portal-dropdown w-48 overflow-hidden rounded-xl bg-white p-1.5 shadow-xl ring-1 ring-slate-900/10 border border-slate-100 text-slate-800"
             >
                 <div class="space-y-0.5">
                     {#each hoveredMenu.children as child (child.label)}
                         <Link
                             href={child.href}
                             onclick={() => (hoveredMenu = null)}
-                            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-primary-600 font-semibold text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium'}"
+                            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-primary-700 font-semibold text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 font-medium'}"
                         >
                             <Icon name={child.icon ?? 'box'} class="h-4 w-4 shrink-0 {isActive(child.href) ? 'text-white' : 'text-slate-400'}" />
                             <span>{child.label}</span>
@@ -439,13 +463,45 @@
     <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white lg:hidden">
         <div class="flex justify-around items-center">
             {#each mobileBottomItems as item (item.label)}
-                <Link
-                    href={getItemHref(item)}
-                    class="flex flex-col items-center gap-1 py-2 text-[10px] transition {isActive(getItemHref(item)) || isChildActive(item) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
-                >
-                    <Icon name={item.icon} class="h-5 w-5" />
-                    <span class="leading-none">{item.label}</span>
-                </Link>
+                {#if item.children}
+                    <div class="relative flex flex-col items-center bottom-nav-popover">
+                        <button
+                            onclick={(e) => {
+                                e.stopPropagation();
+                                activeBottomPopover = activeBottomPopover === item.label ? null : item.label;
+                            }}
+                            class="flex flex-col items-center gap-1 py-2 text-[10px] transition {isActive(getItemHref(item)) || isChildActive(item) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
+                        >
+                            <Icon name={item.icon} class="h-5 w-5" />
+                            <span class="leading-none">{item.label}</span>
+                        </button>
+
+                        {#if activeBottomPopover === item.label}
+                            <div class="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-48 overflow-hidden rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-slate-900/10 border border-slate-100 z-50">
+                                <div class="space-y-0.5">
+                                    {#each item.children as child (child.label)}
+                                        <Link
+                                            href={child.href}
+                                            onclick={() => (activeBottomPopover = null)}
+                                            class="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs transition {isActive(child.href) ? 'bg-primary-700 font-semibold text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 font-medium'}"
+                                        >
+                                            <Icon name={child.icon ?? 'box'} class="h-4 w-4 shrink-0 {isActive(child.href) ? 'text-white' : 'text-slate-400'}" />
+                                            <span>{child.label}</span>
+                                        </Link>
+                                    {/each}
+                                </div>
+                            </div>
+                        {/if}
+                    </div>
+                {:else}
+                    <Link
+                        href={item.href}
+                        class="flex flex-col items-center gap-1 py-2 text-[10px] transition {isActive(item.href) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
+                    >
+                        <Icon name={item.icon} class="h-5 w-5" />
+                        <span class="leading-none">{item.label}</span>
+                    </Link>
+                {/if}
             {/each}
 
             {#if nav.length > 4}
@@ -454,7 +510,7 @@
                     class="flex flex-col items-center gap-1 py-2 text-[10px] text-slate-500 hover:text-primary-700 transition"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
                     </svg>
                     <span class="leading-none">Lainnya</span>
                 </button>
