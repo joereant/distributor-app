@@ -206,7 +206,7 @@
         </div>
 
         <!-- 4. Data Cards Grid Pro (Click Card to Show/Edit) -->
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
             {#each filteredCategories() as cat (cat.id)}
                 <div
                     onclick={() => openEdit(cat)}
