@@ -147,7 +147,7 @@
 
     <!-- Main content -->
     <div class="transition-[padding] duration-200 {collapsed ? 'lg:pl-15' : 'lg:pl-56'}">
-        <main class="mx-auto w-full max-w-7xl px-4 py-5 pb-24 lg:px-8 lg:py-8 lg:pb-8">
+        <main class="mx-auto w-full max-w-[1600px] px-4 py-5 pb-24 lg:px-8 lg:py-8 lg:pb-8">
             {@render children?.()}
         </main>
     </div>
