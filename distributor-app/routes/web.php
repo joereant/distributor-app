@@ -3,6 +3,9 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\AreaController;
+use App\Http\Controllers\ShippingRateController;
+use App\Http\Controllers\PlantController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -42,6 +45,24 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/products/{product}/edit', [ProductController::class, 'edit']);
         Route::put('/admin/products/{product}', [ProductController::class, 'update']);
         Route::delete('/admin/products/{product}', [ProductController::class, 'destroy']);
+
+        // Areas
+        Route::get('/admin/areas', [AreaController::class, 'index']);
+        Route::post('/admin/areas', [AreaController::class, 'store']);
+        Route::put('/admin/areas/{area}', [AreaController::class, 'update']);
+        Route::delete('/admin/areas/{area}', [AreaController::class, 'destroy']);
+
+        // Plants
+        Route::get('/admin/plants', [PlantController::class, 'index']);
+        Route::post('/admin/plants', [PlantController::class, 'store']);
+        Route::put('/admin/plants/{plant}', [PlantController::class, 'update']);
+        Route::delete('/admin/plants/{plant}', [PlantController::class, 'destroy']);
+
+        // Shipping Rates
+        Route::get('/admin/shipping-rates', [ShippingRateController::class, 'index']);
+        Route::post('/admin/shipping-rates', [ShippingRateController::class, 'store']);
+        Route::put('/admin/shipping-rates/{shippingRate}', [ShippingRateController::class, 'update']);
+        Route::delete('/admin/shipping-rates/{shippingRate}', [ShippingRateController::class, 'destroy']);
     });
     Route::middleware('role:sales')->get('/sales', [DashboardController::class, 'sales']);
 

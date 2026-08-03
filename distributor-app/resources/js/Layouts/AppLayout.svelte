@@ -59,12 +59,18 @@
             { label: 'Dashboard', href: '/owner', icon: 'home' },
             { label: 'Order', href: '/admin/orders', icon: 'cart' },
             { label: 'Produk', href: '/admin/products', icon: 'box' },
+            { label: 'Area', href: '/admin/areas', icon: 'map' },
+            { label: 'Pabrik', href: '/admin/plants', icon: 'factory' },
+            { label: 'Ongkir', href: '/admin/shipping-rates', icon: 'truck' },
             { label: 'User', href: '/admin/users', icon: 'users' },
         ],
         admin: [
             { label: 'Dashboard', href: '/admin', icon: 'home' },
             { label: 'Order', href: '/admin/orders', icon: 'cart' },
             { label: 'Produk', href: '/admin/products', icon: 'box' },
+            { label: 'Area', href: '/admin/areas', icon: 'map' },
+            { label: 'Pabrik', href: '/admin/plants', icon: 'factory' },
+            { label: 'Ongkir', href: '/admin/shipping-rates', icon: 'truck' },
             { label: 'User', href: '/admin/users', icon: 'users' },
         ],
         sales: [

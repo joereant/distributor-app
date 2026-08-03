@@ -14,7 +14,7 @@
         truck: '<path d="M14 18V5H3v13h2"/><path d="M15 18h5v-6l-4-4h-1"/><path d="M15 5h2l4 4v9h-1"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
         referral: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4"/><path d="m15.4 6.5-6.8 4"/>',
         logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>',
-        chevron: '<path d="m6 9 6 6 6-6"/>',
+        factory: '<path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><path d="M9 20v-6h6v6"/><path d="M9 10h.01"/><path d="M15 10h.01"/>',
     };
 </script>
 
