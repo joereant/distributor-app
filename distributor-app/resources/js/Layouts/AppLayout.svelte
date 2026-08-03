@@ -229,7 +229,7 @@
     }
 </script>
 
-<div class="mx-auto min-h-screen max-w-[1920px]">
+<div class="mx-auto min-h-screen max-w-[1920px] overflow-x-hidden">
     <!-- Mobile top bar -->
     <header class="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 lg:hidden">
         <div class="flex items-center gap-3">
@@ -454,30 +454,28 @@
 
     <!-- Main content -->
     <div class="transition-[padding] duration-200 {collapsed ? 'lg:pl-16' : 'lg:pl-56'}">
-        <main class="mx-auto w-full max-w-[1600px] px-4 py-5 pb-24 lg:px-8 lg:py-8 lg:pb-8">
+        <main class="mx-auto w-full max-w-[1600px] px-3 sm:px-4 py-5 pb-24 lg:px-8 lg:py-8 lg:pb-8">
             {@render children?.()}
         </main>
-    </div>
-
-    <!-- Mobile bottom nav -->
-    <nav class="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white lg:hidden">
-        <div class="flex justify-around items-center">
-            {#each mobileBottomItems as item (item.label)}
+    </div>    <!-- Mobile bottom nav -->
+    <nav class="fixed inset-x-0 bottom-0 z-30 w-full max-w-full overflow-hidden border-t border-slate-200/80 bg-white/95 backdrop-blur-md pb-[env(safe-area-inset-bottom,0px)] lg:hidden shadow-[0_-4px_16px_rgba(0,0,0,0.06)]">
+        <div class="grid {nav.length > 4 ? 'grid-cols-4 sm:grid-cols-5' : mobileBottomItems.length === 3 ? 'grid-cols-3' : 'grid-cols-4'} items-center w-full max-w-full overflow-hidden px-1">
+            {#each mobileBottomItems as item, idx (item.label)}
                 {#if item.children}
-                    <div class="relative flex flex-col items-center bottom-nav-popover">
+                    <div class="relative {idx === 3 && nav.length > 4 ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center bottom-nav-popover w-full min-w-0 max-w-full overflow-hidden">
                         <button
                             onclick={(e) => {
                                 e.stopPropagation();
                                 activeBottomPopover = activeBottomPopover === item.label ? null : item.label;
                             }}
-                            class="flex flex-col items-center gap-1 py-2 text-[10px] transition {isActive(getItemHref(item)) || isChildActive(item) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
+                            class="flex flex-col items-center justify-center gap-1 py-2 px-0.5 text-[10px] w-full min-w-0 max-w-full overflow-hidden transition {isActive(getItemHref(item)) || isChildActive(item) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
                         >
-                            <Icon name={item.icon} class="h-5 w-5" />
-                            <span class="leading-none">{item.label}</span>
+                            <Icon name={item.icon} class="h-5 w-5 shrink-0" />
+                            <span class="leading-tight truncate w-full max-w-full text-center px-0.5">{item.label}</span>
                         </button>
 
                         {#if activeBottomPopover === item.label}
-                            <div class="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-48 overflow-hidden rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-slate-900/10 border border-slate-100 z-50">
+                            <div class="absolute bottom-full mb-3 {idx === 0 ? 'left-0' : idx === 3 ? 'right-0 sm:left-1/2 sm:-translate-x-1/2' : 'left-1/2 -translate-x-1/2'} w-44 max-w-[calc(100vw-32px)] overflow-hidden rounded-xl bg-white p-1.5 shadow-2xl ring-1 ring-slate-900/10 border border-slate-100 z-50">
                                 <div class="space-y-0.5">
                                     {#each item.children as child (child.label)}
                                         <Link
@@ -496,10 +494,10 @@
                 {:else}
                     <Link
                         href={item.href}
-                        class="flex flex-col items-center gap-1 py-2 text-[10px] transition {isActive(item.href) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
+                        class="{idx === 3 && nav.length > 4 ? 'hidden sm:flex' : 'flex'} flex-col items-center justify-center gap-1 py-2 px-0.5 text-[10px] w-full min-w-0 max-w-full overflow-hidden transition {isActive(item.href) ? 'font-semibold text-primary-700' : 'text-slate-500 hover:text-primary-700'}"
                     >
-                        <Icon name={item.icon} class="h-5 w-5" />
-                        <span class="leading-none">{item.label}</span>
+                        <Icon name={item.icon} class="h-5 w-5 shrink-0" />
+                        <span class="leading-tight truncate w-full max-w-full text-center px-0.5">{item.label}</span>
                     </Link>
                 {/if}
             {/each}
@@ -507,15 +505,15 @@
             {#if nav.length > 4}
                 <button
                     onclick={() => (mobileDrawerOpen = true)}
-                    class="flex flex-col items-center gap-1 py-2 text-[10px] text-slate-500 hover:text-primary-700 transition"
+                    class="flex flex-col items-center justify-center gap-1 py-2 px-0.5 text-[10px] w-full min-w-0 max-w-full overflow-hidden text-slate-500 hover:text-primary-700 transition"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25 2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" class="h-5 w-5 shrink-0">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 0 1 6 3.75h2.25A2.25 2.25 0 0 1 10.5 6v2.25a2.25 2.25 0 0 1-2.25-2.25H6a2.25 2.25 0 0 1-2.25-2.25V6ZM3.75 15.75A2.25 2.25 0 0 1 6 13.5h2.25a2.25 2.25 0 0 1 2.25 2.25V18a2.25 2.25 0 0 1-2.25 2.25H6A2.25 2.25 0 0 1 3.75 18v-2.25ZM13.5 6a2.25 2.25 0 0 1 2.25-2.25H18A2.25 2.25 0 0 1 20.25 6v2.25A2.25 2.25 0 0 1 18 10.5h-2.25a2.25 2.25 0 0 1-2.25-2.25V6ZM13.5 15.75a2.25 2.25 0 0 1 2.25-2.25H18a2.25 2.25 0 0 1 2.25 2.25V18A2.25 2.25 0 0 1 18 20.25h-2.25A2.25 2.25 0 0 1 13.5 18v-2.25Z" />
                     </svg>
-                    <span class="leading-none">Lainnya</span>
+                    <span class="leading-tight truncate w-full max-w-full text-center px-0.5">Lainnya</span>
                 </button>
             {/if}
         </div>
-    </nav>
+    </nav>nav>
 </div>
 

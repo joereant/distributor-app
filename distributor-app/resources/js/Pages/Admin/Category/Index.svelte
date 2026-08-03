@@ -54,8 +54,8 @@
         {#if showCreate}
             <div class="fixed inset-0 z-50">
                 <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]" onclick={() => showCreate = false}></div>
-                <div class="absolute inset-0 flex items-center justify-center p-4">
-                    <div class="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+                <div class="absolute inset-0 flex items-center justify-center p-2.5 sm:p-4">
+                    <div class="w-full max-w-[540px] rounded-2xl bg-white p-4 sm:p-6 shadow-2xl">
                         <h3 class="text-lg font-bold text-slate-800">Tambah Kategori</h3>
                         <p class="mt-1 text-sm text-slate-500">Masukkan nama kategori baru.</p>
                         <form onsubmit={(e) => { e.preventDefault(); submitCreate(); }} class="mt-5 space-y-4">

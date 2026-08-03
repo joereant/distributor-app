@@ -224,8 +224,8 @@
 
     <!-- Modal -->
     {#if showModal}
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-            <div class="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl">
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-2.5 sm:p-4">
+            <div class="w-full max-w-[540px] rounded-2xl bg-white p-4 sm:p-6 shadow-xl">
                 <h3 class="mb-4 text-lg font-bold text-slate-800">{editMode ? 'Edit Customer' : 'Tambah Customer'}</h3>
 
                 <form onsubmit={(e) => { e.preventDefault(); submit(); }} class="space-y-4">
