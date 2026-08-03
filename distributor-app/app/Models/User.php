@@ -31,4 +31,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Area::class, 'sales_area_id');
     }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
 }

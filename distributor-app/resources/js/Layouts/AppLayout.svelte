@@ -81,6 +81,7 @@
         customer: [
             { label: 'Dashboard', href: '/customer', icon: 'home' },
             { label: 'Order', href: '/customer/order', icon: 'cart' },
+            { label: 'Referal', href: '/customer/referal', icon: 'referral' },
         ],
     };
 

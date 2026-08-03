@@ -5,15 +5,17 @@
     let { areas = [] } = $props();
 
     const page = usePage();
+    const errors = $derived(page.props.errors ?? {});
+    const referal_code = $derived(page.props.referal_code ?? '');
+
     const form = useForm({
         name: '',
         email: '',
         password: '',
         password_confirmation: '',
         sales_area_id: '',
+        referal_code: referal_code,
     });
-
-    const errors = $derived(page.props.errors ?? {});
 </script>
 
 <div class="min-h-screen lg:grid lg:grid-cols-2">
@@ -23,6 +25,12 @@
     <main class="flex items-center justify-center px-6 py-10 lg:py-16">
         <div class="w-full max-w-sm">
             <div class="mb-8 text-center lg:text-left">
+                {#if referal_code}
+                    <div class="mb-3 inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 ring-1 ring-emerald-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-3.5 w-3.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        Invite code: {referal_code}
+                    </div>
+                {/if}
                 <h2 class="text-2xl font-bold tracking-tight text-slate-900">Buat akun customer baru</h2>
                 <p class="mt-1 text-sm text-slate-500">Daftar untuk mulai berbelanja & memantau pesanan</p>
             </div>

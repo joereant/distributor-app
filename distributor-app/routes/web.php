@@ -7,6 +7,7 @@ use App\Http\Controllers\AreaController;
 use App\Http\Controllers\ShippingRateController;
 use App\Http\Controllers\PlantController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ReferalController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserController;
@@ -84,5 +85,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/customer', [DashboardController::class, 'customer']);
         Route::get('/customer/order', [OrderController::class, 'create']);
         Route::post('/customer/order', [OrderController::class, 'store']);
+        Route::get('/customer/referal', [ReferalController::class, 'index']);
+        Route::post('/customer/referal/regenerate', [ReferalController::class, 'regenerate']);
     });
 });

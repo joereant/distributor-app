@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Area;
+use App\Models\Customer;
+use App\Models\Referal;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Socialite\Facades\Socialite;
 
@@ -48,10 +51,11 @@ class AuthController extends Controller
         return redirect('/login');
     }
 
-    public function showRegister()
+    public function showRegister(Request $request)
     {
         return Inertia::render('Auth/Register', [
             'areas' => Area::orderBy('name')->get(['id', 'name']),
+            'referal_code' => $request->get('ref'),
         ]);
     }
 
@@ -62,7 +66,14 @@ class AuthController extends Controller
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', 'min:8'],
             'sales_area_id' => ['required', 'exists:areas,id'],
+            'referal_code' => ['nullable', 'string', 'max:20'],
         ]);
+
+        $referalCustomerId = null;
+        if (!empty($data['referal_code'])) {
+            $referal = Referal::where('referral_code', strtoupper($data['referal_code']))->first();
+            $referalCustomerId = $referal?->customer_id;
+        }
 
         $user = User::create([
             'name' => $data['name'],
@@ -73,9 +84,22 @@ class AuthController extends Controller
             'status' => 'pending',
         ]);
 
+        Customer::create([
+            'user_id' => $user->id,
+            'company_name' => $data['name'],
+            'email' => $data['email'],
+            'sales_area_id' => $data['sales_area_id'],
+            'referal_id' => $referalCustomerId,
+        ]);
+
         Auth::logout();
 
-        return redirect('/login')->with('message', "Pendaftaran berhasil, {$user->name}! Akun Anda menunggu persetujuan admin.");
+        $msg = "Pendaftaran berhasil, {$user->name}! Akun Anda menunggu persetujuan admin.";
+        if ($referalCustomerId) {
+            $msg .= " Anda join via referal.";
+        }
+
+        return redirect('/login')->with('message', $msg);
     }
 
     public function redirectToGoogle()
