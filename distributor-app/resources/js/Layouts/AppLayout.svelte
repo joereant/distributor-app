@@ -86,7 +86,9 @@
     }
 
     function isActive(href) {
-        return href && (currentUrl === href || currentUrl.startsWith(`${href}/`));
+        if (!href) return false;
+        // Exact match only — no startsWith for route matching
+        return currentUrl === href;
     }
 
     function initials(name) {
