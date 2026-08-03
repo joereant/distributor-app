@@ -1,5 +1,5 @@
 <script>
-    import { usePage } from '@inertiajs/svelte';
+    import { router, usePage } from '@inertiajs/svelte';
     import AppLayout from '../../Layouts/AppLayout.svelte';
     import DashboardStat from '../../Components/DashboardStat.svelte';
     import DashboardCard from '../../Components/DashboardCard.svelte';
@@ -12,6 +12,14 @@
     const customer = $derived(page.props.customer);
 
     const today = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+    // Polling: auto-refresh setiap 10 detik
+    $effect(() => {
+        const interval = setInterval(() => {
+            router.reload({ only: ['orders', 'kpis'] });
+        }, 10000);
+        return () => clearInterval(interval);
+    });
 
     function formatRp(value) {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);

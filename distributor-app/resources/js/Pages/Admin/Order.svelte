@@ -11,6 +11,15 @@
 
     let selected = $state(null);
 
+    // Polling: auto-refresh setiap 10 detik
+    $effect(() => {
+        if (selected) return; // Jangan polling kalau lagi lihat detail
+        const interval = setInterval(() => {
+            router.reload({ only: ['transactions'] });
+        }, 10000);
+        return () => clearInterval(interval);
+    });
+
     function formatRp(value) {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value ?? 0);
     }
