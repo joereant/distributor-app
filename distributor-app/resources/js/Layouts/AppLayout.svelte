@@ -6,6 +6,7 @@
     let { children } = $props();
 
     const page = usePage();
+    const currentUrl = $derived(page.url);
     const user = $derived(page.props.auth?.user);
     const role = $derived(user?.role ?? 'customer');
 
@@ -85,7 +86,7 @@
     }
 
     function isActive(href) {
-        return href && (page.url === href || page.url.startsWith(`${href}/`));
+        return href && (currentUrl === href || currentUrl.startsWith(`${href}/`));
     }
 
     function initials(name) {
