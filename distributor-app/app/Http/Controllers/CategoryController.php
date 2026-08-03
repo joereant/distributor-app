@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        $categories = Category::orderBy('name')->get();
+        $categories = Category::orderBy('name')->withCount('products')->get();
 
         return Inertia::render('Admin/Category/Index', [
             'categories' => $categories,
@@ -24,6 +25,8 @@ class CategoryController extends Controller
             'is_active' => 'boolean',
         ]);
 
+        $validated['slug'] = Str::slug($validated['name']);
+
         Category::create($validated);
 
         return redirect()->back()->with('message', ['type' => 'success', 'text' => 'Kategori berhasil ditambahkan']);
@@ -35,6 +38,8 @@ class CategoryController extends Controller
             'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
             'is_active' => 'boolean',
         ]);
+
+        $validated['slug'] = Str::slug($validated['name']);
 
         $category->update($validated);
 
