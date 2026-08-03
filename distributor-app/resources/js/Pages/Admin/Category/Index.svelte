@@ -3,7 +3,8 @@
     import AppLayout from '../../../Layouts/AppLayout.svelte';
 
     const page = usePage();
-    const categories = $derived(page.props.categories ?? []);
+    const rawCategories = $derived(page.props.categories ?? []);
+    const categories = $derived(Array.isArray(rawCategories) ? rawCategories : (rawCategories.data ?? []));
     const filters = $derived(page.props.filters ?? {});
     const flash = $derived(page.props.flash?.message);
     const errors = $derived(page.props.errors ?? {});
@@ -14,12 +15,12 @@
     let createActive = $state(true);
 
     function applyFilter() {
-        router.get('/admin/categories', { search: search || undefined });
+        router.get('/admin/products/categories', { search: search || undefined });
     }
 
     function submitCreate() {
         if (!createName.trim()) return;
-        router.post('/admin/categories', { name: createName.trim(), is_active: createActive }, {
+        router.post('/admin/products/categories', { name: createName.trim(), is_active: createActive }, {
             onSuccess: () => {
                 showCreate = false;
                 createName = '';
@@ -90,7 +91,7 @@
 
         <!-- List -->
         <div class="space-y-3">
-            {#each categories.data as cat (cat.id)}
+            {#each categories as cat (cat.id)}
                 <div class="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-200 {!cat.is_active ? 'opacity-60' : ''}">
                     <div class="flex items-center justify-between">
                         <div>
@@ -101,7 +102,7 @@
                             <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ring-1 {cat.is_active ? 'bg-emerald-50 text-emerald-700 ring-emerald-100' : 'bg-slate-100 text-slate-500 ring-slate-200'}">
                                 {cat.is_active ? 'Aktif' : 'Nonaktif'}
                             </span>
-                            <form onsubmit={(e) => { e.preventDefault(); router.put(`/admin/categories/${cat.id}`, { name: cat.name, is_active: !cat.is_active }); }} class="inline">
+                            <form onsubmit={(e) => { e.preventDefault(); router.put(`/admin/products/categories/${cat.id}`, { name: cat.name, is_active: !cat.is_active }); }} class="inline">
                                 <button type="submit" class="text-xs font-medium text-slate-500 transition hover:text-slate-700">
                                     {cat.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                                 </button>
@@ -110,7 +111,7 @@
                     </div>
                 </div>
             {/each}
-            {#if categories.data.length === 0}
+            {#if categories.length === 0}
                 <div class="rounded-2xl bg-white p-10 text-center shadow-sm ring-1 ring-slate-200">
                     <p class="text-sm text-slate-400">Belum ada kategori.</p>
                 </div>

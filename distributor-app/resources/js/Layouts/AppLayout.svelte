@@ -35,6 +35,21 @@
 
     let userMenuOpen = $state(false);
     let topMenuOpen = $state(false);
+    let expandedMenus = $state({});
+    let hoveredMenu = $state(null);
+    let menuPosition = $state({ top: 0, left: 0 });
+
+    // Auto-expand menu if child is active
+    $effect(() => {
+        for (const item of nav) {
+            if (item.children) {
+                const hasActiveChild = item.children.some(c => isActive(c.href));
+                if (hasActiveChild) {
+                    expandedMenus[item.label] = true;
+                }
+            }
+        }
+    });
 
     $effect(() => {
         if (!userMenuOpen) return;
@@ -54,11 +69,27 @@
         return () => document.removeEventListener('click', close);
     });
 
+    // Close portal dropdown on click outside
+    $effect(() => {
+        if (hoveredMenu === null) return;
+        function handleClick(e) {
+            if (!e.target.closest('.sidebar-dropdown') && !e.target.closest('.portal-dropdown')) {
+                hoveredMenu = null;
+            }
+        }
+        document.addEventListener('click', handleClick);
+        return () => document.removeEventListener('click', handleClick);
+    });
+
     const navByRole = {
         owner: [
             { label: 'Dashboard', href: '/owner', icon: 'home' },
             { label: 'Order', href: '/admin/orders', icon: 'cart' },
-            { label: 'Produk', href: '/admin/products', icon: 'box' },
+            { label: 'Produk', icon: 'box', children: [
+                { label: 'Daftar Produk', href: '/admin/products' },
+                { label: 'Kategori', href: '/admin/products/categories' },
+                { label: 'Daftar Harga', href: '/admin/products?tab=prices' },
+            ]},
             { label: 'Area', href: '/admin/areas', icon: 'map' },
             { label: 'Pabrik', href: '/admin/plants', icon: 'factory' },
             { label: 'Ongkir', href: '/admin/shipping-rates', icon: 'truck' },
@@ -69,7 +100,11 @@
         admin: [
             { label: 'Dashboard', href: '/admin', icon: 'home' },
             { label: 'Order', href: '/admin/orders', icon: 'cart' },
-            { label: 'Produk', href: '/admin/products', icon: 'box' },
+            { label: 'Produk', icon: 'box', children: [
+                { label: 'Daftar Produk', href: '/admin/products' },
+                { label: 'Kategori', href: '/admin/products/categories' },
+                { label: 'Daftar Harga', href: '/admin/products?tab=prices' },
+            ]},
             { label: 'Area', href: '/admin/areas', icon: 'map' },
             { label: 'Pabrik', href: '/admin/plants', icon: 'factory' },
             { label: 'Ongkir', href: '/admin/shipping-rates', icon: 'truck' },
@@ -96,9 +131,19 @@
         localStorage.setItem('sentrax_sidebar_collapsed', String(collapsed));
     }
 
+    // Check if any child or parent URL is active
+    function isChildActive(item) {
+        if (!item.children) return false;
+        return item.children.some(c => {
+            if (!c.href) return false;
+            if (currentUrl === c.href) return true;
+            if (c.href === '/admin/products' && currentUrl.startsWith('/admin/products')) return true;
+            return false;
+        });
+    }
+
     function isActive(href) {
         if (!href) return false;
-        // Exact match only — no startsWith for route matching
         return currentUrl === href;
     }
 
@@ -164,18 +209,57 @@
             </button>
         </div>
 
-        <nav class="flex flex-1 flex-col overflow-y-auto {collapsed ? 'items-center justify-center gap-3.5 py-3' : 'justify-start space-y-3.5 px-3 pt-4 pb-2'}">
+        <nav class="sidebar-dropdown flex flex-1 flex-col overflow-y-auto {collapsed ? 'items-center justify-center gap-3.5 py-3' : 'justify-start space-y-3.5 px-3 pt-4 pb-2'} relative">
             {#each nav as item (item.label)}
-                <a
-                    href={item.href}
-                    title={collapsed ? item.label : undefined}
-                    class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {isActive(item.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
-                >
-                    <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'}" />
-                    {#if !collapsed}
-                        <span class="flex-1 text-left text-sm">{item.label}</span>
-                    {/if}
-                </a>
+                {#if item.children}
+                    <!-- Parent with children -->
+                    <div class="relative">
+                        <button
+                            onclick={(e) => {
+                                e.stopPropagation();
+                                if (collapsed) {
+                                    hoveredMenu = hoveredMenu === item ? null : item;
+                                    if (hoveredMenu) {
+                                        const rect = e.currentTarget.getBoundingClientRect();
+                                        menuPosition = { top: rect.top, left: rect.right + 4 };
+                                    }
+                                } else {
+                                    expandedMenus[item.label] = !expandedMenus[item.label];
+                                }
+                            }}
+                            title={item.label}
+                            class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {isChildActive(item) || hoveredMenu === item || (!collapsed && expandedMenus[item.label]) ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
+                        >
+                            <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'}" />
+                            {#if !collapsed}
+                                <span class="flex-1 text-left text-sm">{item.label}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 transition {!collapsed && expandedMenus[item.label] ? 'rotate-180' : ''}"><path d="m6 9 6 6 6-6"/></svg>
+                            {/if}
+                        </button>
+                        {#if !collapsed && expandedMenus[item.label]}
+                            <div class="ml-4 mt-1 space-y-0.5 border-l border-white/20 pl-3">
+                                {#each item.children as child (child.label)}
+                                    <a href={child.href} class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition {isActive(child.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/60 hover:bg-white/10 hover:text-white'}">
+                                        <span class="h-1.5 w-1.5 rounded-full {isActive(child.href) ? 'bg-white' : 'bg-white/40'}"></span>
+                                        {child.label}
+                                    </a>
+                                {/each}
+                            </div>
+                        {/if}
+                    </div>
+                {:else}
+                    <!-- Simple link -->
+                    <a
+                        href={item.href}
+                        title={collapsed ? item.label : undefined}
+                        class="flex items-center rounded-lg transition {collapsed ? 'h-11 w-11 justify-center' : 'w-full gap-3 px-3 py-2'} {isActive(item.href) ? 'bg-white/15 font-semibold text-white' : 'text-white/70 hover:bg-white/10 hover:text-white'}"
+                    >
+                        <Icon name={item.icon} class="shrink-0 {collapsed ? 'h-6 w-6' : 'h-5 w-5'}" />
+                        {#if !collapsed}
+                            <span class="flex-1 text-left text-sm">{item.label}</span>
+                        {/if}
+                    </a>
+                {/if}
             {/each}
         </nav>
 
@@ -197,6 +281,21 @@
                 {/if}
             </div>
         </div>
+
+        <!-- Portal dropdown for collapsed state -->
+        {#if collapsed && hoveredMenu}
+            <div
+                style="position: fixed; top: {menuPosition.top}px; left: {menuPosition.left}px; z-index: 9999;"
+                class="portal-dropdown w-44 overflow-hidden rounded-lg bg-white shadow-lg"
+            >
+                {#each hoveredMenu.children as child (child.label)}
+                    <a href={child.href} class="flex items-center gap-2 px-3 py-2.5 text-sm {isActive(child.href) ? 'bg-primary-50 font-semibold text-primary-700' : 'text-slate-600 hover:bg-slate-50'}">
+                        <span class="h-1.5 w-1.5 rounded-full flex-shrink-0 {isActive(child.href) ? 'bg-primary-600' : 'bg-slate-300'}"></span>
+                        {child.label}
+                    </a>
+                {/each}
+            </div>
+        {/if}
     </aside>
 
     <!-- Main content -->

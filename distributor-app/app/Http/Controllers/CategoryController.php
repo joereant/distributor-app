@@ -4,63 +4,52 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
+use Inertia\Inertia;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
-        $categories = Category::withCount('products')
-            ->when($request->search, fn ($q) => $q->where('name', 'like', "%{$request->search}%"))
-            ->orderBy('name')
-            ->paginate(20)
-            ->withQueryString();
+        $categories = Category::orderBy('name')->get();
 
-        return inertia('Admin/Category/Index', [
+        return Inertia::render('Admin/Category/Index', [
             'categories' => $categories,
-            'filters' => $request->only(['search']),
         ]);
     }
 
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
-            'is_active' => ['nullable', 'boolean'],
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name',
+            'is_active' => 'boolean',
         ]);
 
-        $data['slug'] = Str::slug($data['name']);
-        $data['is_active'] = $data['is_active'] ?? true;
+        Category::create($validated);
 
-        $category = Category::create($data);
-
-        return redirect('/admin/categories')->with('message', "Kategori '{$category->name}' berhasil ditambahkan.");
+        return redirect()->back()->with('message', ['type' => 'success', 'text' => 'Kategori berhasil ditambahkan']);
     }
 
     public function update(Request $request, Category $category)
     {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')->ignore($category->id)],
-            'is_active' => ['nullable', 'boolean'],
+        $validated = $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name,' . $category->id,
+            'is_active' => 'boolean',
         ]);
 
-        $data['slug'] = Str::slug($data['name']);
-        $data['is_active'] = $data['is_active'] ?? false;
+        $category->update($validated);
 
-        $category->update($data);
-
-        return back()->with('message', 'Perubahan disimpan.');
+        return redirect()->back()->with('message', ['type' => 'success', 'text' => 'Kategori berhasil diupdate']);
     }
 
     public function destroy(Category $category)
     {
+        // Check if category has products
         if ($category->products()->exists()) {
-            return back()->withErrors(['delete' => "Kategori '{$category->name}' tidak bisa dihapus karena masih punya {$category->products()->count()} produk."]);
+            return redirect()->back()->with('message', ['type' => 'error', 'text' => 'Kategori tidak bisa dihapus — sudah ada produk']);
         }
 
         $category->delete();
 
-        return redirect('/admin/categories')->with('message', "Kategori '{$category->name}' berhasil dihapus.");
+        return redirect()->back()->with('message', ['type' => 'success', 'text' => 'Kategori berhasil dihapus']);
     }
 }

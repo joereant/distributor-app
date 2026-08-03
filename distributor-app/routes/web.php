@@ -9,6 +9,7 @@ use App\Http\Controllers\PlantController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReferalController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\UserController;
@@ -53,14 +54,17 @@ Route::middleware('auth')->group(function () {
         // Products
         Route::get('/admin/products', [ProductController::class, 'index']);
         Route::post('/admin/products/prices', [ProductController::class, 'savePrices']);
-        Route::post('/admin/products/categories', [ProductController::class, 'saveCategory']);
-        Route::post('/admin/products/categories/{category}/toggle', [ProductController::class, 'toggleCategory']);
-        Route::delete('/admin/products/categories/{category}', [ProductController::class, 'deleteCategory']);
         Route::get('/admin/products/create', [ProductController::class, 'create']);
         Route::post('/admin/products', [ProductController::class, 'store']);
         Route::get('/admin/products/{product}/edit', [ProductController::class, 'edit']);
         Route::put('/admin/products/{product}', [ProductController::class, 'update']);
         Route::delete('/admin/products/{product}', [ProductController::class, 'destroy']);
+
+        // Categories (nested under Products)
+        Route::get('/admin/products/categories', [CategoryController::class, 'index']);
+        Route::post('/admin/products/categories', [CategoryController::class, 'store']);
+        Route::put('/admin/products/categories/{category}', [CategoryController::class, 'update']);
+        Route::delete('/admin/products/categories/{category}', [CategoryController::class, 'destroy']);
 
         // Areas
         Route::get('/admin/areas', [AreaController::class, 'index']);
