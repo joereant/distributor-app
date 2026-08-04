@@ -12,7 +12,6 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\UserManagementController;
-use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect('/login'));
@@ -35,9 +34,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin', [DashboardController::class, 'admin']);
         Route::get('/admin/orders', [OrderController::class, 'index']);
         Route::post('/admin/orders/{transaction}/approve', [OrderController::class, 'approve']);
-        Route::get('/admin/users', [UserController::class, 'index']);
-        Route::post('/admin/users/{user}/approve', [UserController::class, 'approve']);
-        Route::post('/admin/users/{user}/reject', [UserController::class, 'reject']);
 
         // User Management
         Route::get('/admin/users-manage', [UserManagementController::class, 'index']);

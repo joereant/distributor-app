@@ -8,7 +8,6 @@ use App\Models\Plant;
 use App\Models\Product;
 use App\Models\ProductPrice;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
@@ -174,39 +173,5 @@ class ProductController extends Controller
         }
 
         return back()->with('message', 'Daftar harga berhasil disimpan.');
-    }
-
-    public function saveCategory(Request $request)
-    {
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255', 'unique:categories,name'],
-        ]);
-
-        $data['slug'] = Str::slug($data['name']);
-        $data['is_active'] = true;
-
-        $category = Category::create($data);
-
-        return back()->with('message', "Kategori '{$category->name}' berhasil ditambahkan.");
-    }
-
-    public function toggleCategory(Category $category)
-    {
-        $category->update(['is_active' => !$category->is_active]);
-
-        return back()->with('message', $category->is_active
-            ? "Kategori '{$category->name}' diaktifkan."
-            : "Kategori '{$category->name}' dinonaktifkan.");
-    }
-
-    public function deleteCategory(Category $category)
-    {
-        if ($category->products()->exists()) {
-            return back()->withErrors(['delete' => "Kategori '{$category->name}' tidak bisa dihapus karena masih punya {$category->products()->count()} produk."]);
-        }
-
-        $category->delete();
-
-        return back()->with('message', "Kategori '{$category->name}' berhasil dihapus.");
     }
 }

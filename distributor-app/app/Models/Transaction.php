@@ -40,9 +40,4 @@ class Transaction extends Model
     {
         return $this->hasMany(TransactionItem::class);
     }
-
-    public function distributions(): HasMany
-    {
-        return $this->hasMany(Distribution::class);
-    }
 }
