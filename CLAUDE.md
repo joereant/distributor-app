@@ -3,7 +3,7 @@
 ## Trigger Cepat
 - **Mulai sesi:** Cek `git status` 2 repo (distributor-app + ObsidianDen), `git pull`. Baca `../ObsidianDen/99_System/ctx/CURRENT.md`. Langsung kerja / tanya om (JANGAN salam/basa-basi).
 - **Bungkus:** Update `CURRENT.md` + `DECISIONS.md`, commit & push 2 repo, lapor om.
-- **Handoff / Aturan Global:** Ikuti `../ObsidianDen/99_System/agents.md`. File sistem lain (`SESSION_INIT`, `skills/`, dll) HANYA dibaca on-demand jika dibutuhkan.
+- **Handoff / Aturan Global:** Ikuti `../ObsidianDen/99_System/agent-registry.md`. File sistem lain (`SESSION_INIT`, `skills/`, dll) HANYA dibaca on-demand jika dibutuhkan.
 
 ---
 
@@ -25,4 +25,4 @@
 ## Peta Dokumen (On-Demand)
 - Keputusan & Guard Rails: `../ObsidianDen/10_Projects/DistributorApp/DECISIONS.md`
 - Tech Specs: `./TECH_SPECS.md`
-- Aturan Global: `../ObsidianDen/99_System/agents.md`
+- Aturan Global: `../ObsidianDen/99_System/agent-registry.md`
